@@ -34,6 +34,9 @@ return require('packer').startup(function(use)
   use('mbbill/undotree')
   use('tpope/vim-fugitive')
   use('github/copilot.vim')
+  use('Olical/conjure')  use('tpope/vim-dispatch')
+  use('clojure-vim/vim-jack-in')
+  use('radenling/vim-dispatch-neovim')
   use {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",

@@ -104,6 +104,11 @@ _G.packer_plugins = {
     path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/cmp_luasnip",
     url = "https://github.com/saadparwaiz1/cmp_luasnip"
   },
+  conjure = {
+    loaded = true,
+    path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/conjure",
+    url = "https://github.com/Olical/conjure"
+  },
   ["copilot.vim"] = {
     loaded = true,
     path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/copilot.vim",
@@ -195,10 +200,25 @@ _G.packer_plugins = {
     path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/undotree",
     url = "https://github.com/mbbill/undotree"
   },
+  ["vim-dispatch"] = {
+    loaded = true,
+    path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/vim-dispatch",
+    url = "https://github.com/tpope/vim-dispatch"
+  },
+  ["vim-dispatch-neovim"] = {
+    loaded = true,
+    path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/vim-dispatch-neovim",
+    url = "https://github.com/radenling/vim-dispatch-neovim"
+  },
   ["vim-fugitive"] = {
     loaded = true,
     path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/vim-fugitive",
     url = "https://github.com/tpope/vim-fugitive"
+  },
+  ["vim-jack-in"] = {
+    loaded = true,
+    path = "/Users/rafael/.local/share/nvim/site/pack/packer/start/vim-jack-in",
+    url = "https://github.com/clojure-vim/vim-jack-in"
   }
 }
 
