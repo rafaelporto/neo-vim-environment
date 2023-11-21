@@ -86,11 +86,10 @@ return {
     config = function()
       -- This is where all the LSP shenanigans will live
       local lsp_zero = require('lsp-zero')
-      local lspconfig = require('lspconfig')
 
       require('mason').setup({})
       require('mason-lspconfig').setup({
-          ensure_installed = { "tsserver", "eslint", "omnisharp_mono", "clojure_lsp" },
+          ensure_installed = { "tsserver", "eslint", "omnisharp", "clojure_lsp" },
           handlers = {
               lsp_zero.default_setup,
               lua_ls = function()
@@ -102,15 +101,19 @@ return {
               end,
               tsserver = function ()
                   require('lspconfig').tsserver.setup{}
+              end,
+              omnisharp = function ()
+                  local home = os.getenv( "HOME" )
+                  require'lspconfig'.omnisharp.setup{
+                        cmd = { "dotnet",home ..  "/.local/omnisharp/OmniSharp.dll" },
+                        enable_roslyn_analysers = true,
+                        enable_import_completion = true,
+                        organize_imports_on_format = true,
+                        filetypes = { 'cs', 'vb', 'csproj', 'sln', 'props' },
+                    }
               end
-          }
-      })
 
-      lspconfig.omnisharp_mono.setup({
-          enable_roslyn_analysers = true,
-          enable_import_completion = true,
-          organize_imports_on_format = true,
-          filetypes = { 'cs', 'vb', 'csproj', 'sln', 'slnx', 'props' },
+          }
       })
 
       lsp_zero.set_sign_icons({
