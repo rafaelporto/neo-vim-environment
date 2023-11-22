@@ -6,7 +6,6 @@ return {
     'nvim-treesitter/nvim-treesitter-context',
     'mbbill/undotree',
     'github/copilot.vim',
-    'Olical/conjure',
     'tpope/vim-dispatch',
     'clojure-vim/vim-jack-in',
     'radenling/vim-dispatch-neovim',
@@ -19,5 +18,18 @@ return {
         dependencies = {
             {'hrsh7th/cmp-nvim-lsp'},
         }
+    },
+    {
+        'neoclide/coc.nvim',
+        branch = 'release',
+        init = function ()
+            vim.g.coc_global_extensions = {
+                'coc-conjure',
+                'coc-tsserver',
+                'coc-json',
+                'coc-html',
+                'coc-css'
+            }
+        end
     }
 }
