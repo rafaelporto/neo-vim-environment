@@ -31,5 +31,7 @@ return {
                 'coc-css'
             }
         end
-    }
+    },
+    'hoffs/omnisharp-extended-lsp.nvim'
+
 }
