@@ -5,7 +5,11 @@ return {
     },
     'nvim-treesitter/nvim-treesitter-context',
     'mbbill/undotree',
-    'github/copilot.vim',
+    {
+        'github/copilot.vim',
+        lazy = false,
+        enabled = true
+    },
     'tpope/vim-dispatch',
     'clojure-vim/vim-jack-in',
     'radenling/vim-dispatch-neovim',
