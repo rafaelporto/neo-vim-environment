@@ -89,7 +89,7 @@ return {
 
             require('mason').setup({})
             require('mason-lspconfig').setup({
-                ensure_installed = { "tsserver", "eslint", "clojure_lsp" },
+                ensure_installed = { "tsserver", "eslint", "clojure_lsp", "omnisharp" },
                 handlers = {
                     lsp_zero.default_setup,
                     lua_ls = function()
@@ -102,29 +102,29 @@ return {
                     tsserver = function()
                         require('lspconfig').tsserver.setup {}
                     end,
-                  -- omnisharp = function()
-                  --      local pid = vim.fn.getpid()
-                  --      local home = os.getenv("HOME")
-                  --      local omnisharp_extended = require('omnisharp_extended')
-                  --      require 'lspconfig'.omnisharp.setup {
-                  --          cmd = {
-                  --              home .. "/.omnisharp/OmniSharp",
-                  --              '--languageserver',
-                  --              '--hostPID',
-                  --              tostring(pid)
-                  --          },
-                  --          enable_roslyn_analysers = true,
-                  --          enable_import_completion = true,
-                  --          organize_imports_on_format = true,
-                  --          filetypes = { 'cs', 'vb', 'csproj', 'sln', 'props' },
-                  --          handlers = {
-                  --              ["textDocument/definition"] = omnisharp_extended.handler,
-                  --              ["on_attach"] = function()
-                  --                  vim.keymap.set("n", "<leader>gdr", omnisharp_extended.telescope_lsp_definitions(), {})
-                  --              end
-                  --          }
-                  --      }
-                  --  end
+                    omnisharp = function()
+                        local pid = vim.fn.getpid()
+                        local home = os.getenv("HOME")
+                        local omnisharp_extended = require('omnisharp_extended')
+                        require 'lspconfig'.omnisharp.setup {
+                            cmd = {
+                                home .. "/.omnisharp/OmniSharp",
+                                '--languageserver',
+                                '--hostPID',
+                                tostring(pid)
+                            },
+                            enable_roslyn_analysers = true,
+                            enable_import_completion = true,
+                            organize_imports_on_format = true,
+                            filetypes = { 'cs', 'vb', 'csproj', 'sln', 'props' },
+                            handlers = {
+                                ["textDocument/definition"] = omnisharp_extended.handler,
+                                ["on_attach"] = function()
+                                    vim.keymap.set("n", "<leader>gdr", omnisharp_extended.telescope_lsp_definitions(), {})
+                                end
+                            }
+                        }
+                    end
 
                 }
             })
