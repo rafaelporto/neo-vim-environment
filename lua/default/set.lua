@@ -29,3 +29,14 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
+
+-- conjure
+vim.g["conjure#log#botright"] = true
+vim.g["conjure#debug"] = false
+
+-- markdown
+vim.g["mkdp_auto_start"] = 1
+vim.g["mkdp_refresh_slow"] = 1
+
+-- copilot
+vim.g.copilot_assume_mapped = true
