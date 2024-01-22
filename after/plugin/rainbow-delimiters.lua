@@ -6,20 +6,19 @@ require('rainbow-delimiters.setup').setup {
         vim = rainbow_delimiters.strategy['local']
     },
     query = {
-        [''] = 'rainbow-delimiters',
-        lua = 'rainbow-blocks',
+        [''] = 'rainbow-delimiters'
     },
     priority = {
         [''] = 110,
         lua = 210,
     },
     highlight = {
-        'RainbowDelimiterRed',
+        'RainbowDelimiterGreen',
         'RainbowDelimiterYellow',
         'RainbowDelimiterBlue',
-        'RainbowDelimiterOrange',
-        'RainbowDelimiterGreen',
         'RainbowDelimiterViolet',
         'RainbowDelimiterCyan',
+        'RainbowDelimiterOrange',
+        'RainbowDelimiterRed',
     }
 }

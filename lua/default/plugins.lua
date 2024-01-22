@@ -74,7 +74,7 @@ return {
       },
       lazy = false
   },
-  { 'HiPhish/rainbow-delimiters.nvim',        lazy = false },
+  { 'HiPhish/rainbow-delimiters.nvim',        lazy = true },
   { "b0o/schemastore.nvim",                   lazy = true },
   { 'nvim-telescope/telescope-ui-select.nvim' },
   { 'nvim-telescope/telescope-dap.nvim',      lazy = true },
