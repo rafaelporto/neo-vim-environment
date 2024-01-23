@@ -30,6 +30,7 @@ treesitter.setup({             -- enable syntax highlighting
         "markdown",
         "sql",
         "yaml",
-        "tsx"
+        "tsx",
+        "scala"
     }
 })
