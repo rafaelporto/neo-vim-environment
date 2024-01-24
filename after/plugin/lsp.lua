@@ -11,10 +11,31 @@ require('mason-lspconfig').setup({
         "eslint",
         "clojure_lsp",
         "omnisharp",
-        "lua_ls"
+        "lua_ls",
+        "yamlls",
+        "jsonls",
+        "dockerls"
     },
     handlers = {
         lsp.default_setup,
+        docker_compose_language_service =function ()
+            lspconfig.docker_compose_language_service.setup{}
+        end,
+        marksman = function()
+            lspconfig.marksman.setup {}
+        end,
+        dockerls = function()
+            -- To install the server: npm install -g dockerfile-language-server-nodejs
+            lspconfig.dockerls.setup {}
+        end,
+        cssls = function()
+            --Enable (broadcasting) snippet capability for completion
+            local capabilities = vim.lsp.protocol.make_client_capabilities()
+            capabilities.textDocument.completion.completionItem.snippetSupport = true
+            lspconfig.cssls.setup {
+                capabilities = capabilities
+            } -- the server can be installed via: npm i -g vscode-langservers-extracted
+        end,
         lua_ls = function()
             local lua_opts = lsp.nvim_lua_ls()
             lspconfig.lua_ls.setup(lua_opts)
@@ -122,14 +143,14 @@ lsp.on_attach(function(_, bufnr)
     vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
     vim.keymap.set("n", ">d", function() vim.diagnostic.goto_next() end, opts)
     vim.keymap.set("n", "<d", function() vim.diagnostic.goto_prev() end, opts)
-    vim.keymap.set("n", "<leader>aa", function () vim.diagnostic.setqflist() end, opts)
-    vim.keymap.set("n", "<leader>ae", function ()
+    vim.keymap.set("n", "<leader>aa", function() vim.diagnostic.setqflist() end, opts)
+    vim.keymap.set("n", "<leader>ae", function()
         vim.diagnostic.setqflist({ severity = "E" }) -- all workspace errors
     end, opts)
-    vim.keymap.set("n", "<leader>aw", function ()
+    vim.keymap.set("n", "<leader>aw", function()
         vim.diagnostic.setqflist({ severity = "W" }) -- all workspace warnings
     end, opts)
-    vim.keymap.set("n", "<leader>d", function ()
+    vim.keymap.set("n", "<leader>d", function()
         vim.diagnostic.setloclist()
     end, opts) -- buffer diagnostics only
 end)

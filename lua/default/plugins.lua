@@ -132,5 +132,9 @@ return {
             "nvim-lua/plenary.nvim",
             "mfussenegger/nvim-dap"
         }
+    },
+    {
+        'nvim-lualine/lualine.nvim',
+        dependencies = { 'nvim-tree/nvim-web-devicons' }
     }
 }
