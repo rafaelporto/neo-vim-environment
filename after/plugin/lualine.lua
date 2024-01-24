@@ -1,3 +1,18 @@
+local clients_lsp = function ()
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  local clients = vim.lsp.buf_get_clients(bufnr)
+  if next(clients) == nil then
+    return ''
+  end
+
+  local c = {}
+  for _, client in pairs(clients) do
+    table.insert(c, client.name)
+  end
+  return '\u{f085} ' .. table.concat(c, '|')
+end
+
 require('lualine').setup {
     options = {
         icons_enabled = true,
@@ -21,8 +36,8 @@ require('lualine').setup {
         lualine_a = { 'mode' },
         lualine_b = { 'branch', 'diff', 'diagnostics' },
         lualine_c = { 'filename' },
-        lualine_x = { 'encoding' },
-        lualine_y = { 'filetype' },
+        lualine_x = { clients_lsp },
+        lualine_y = { 'encoding', 'filetype' },
         lualine_z = { 'location' }
     },
     inactive_sections = {
@@ -34,9 +49,9 @@ require('lualine').setup {
         lualine_z = {}
     },
     tabline = {
-        lualine_a = {},
-        lualine_b = { 'branch' },
-        lualine_c = { 'filename' },
+        lualine_a = { 'filename' },
+        lualine_b = { 'diff' },
+        lualine_c = {},
         lualine_x = {},
         lualine_y = {},
         lualine_z = {}
