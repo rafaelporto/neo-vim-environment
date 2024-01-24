@@ -1,5 +1,11 @@
 return {
     {
+        "folke/tokyonight.nvim",
+        lazy = false,
+        priority = 1000,
+        opts = {},
+    },
+    {
         'rose-pine/neovim',
         name = 'rose-pine'
     },
@@ -136,5 +142,10 @@ return {
     {
         'nvim-lualine/lualine.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' }
+    },
+    {
+        'jose-elias-alvarez/null-ls.nvim',
+        lazy = true,
+        dependencies = { "nvim-lua/plenary.nvim" }
     }
 }
