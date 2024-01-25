@@ -4,6 +4,9 @@ local schemas = require('schemastore')
 
 lsp.preset("recommended")
 
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
 require('mason').setup({})
 require('mason-lspconfig').setup({
     ensure_installed = {
@@ -19,8 +22,7 @@ require('mason-lspconfig').setup({
     handlers = {
         lsp.default_setup,
         bashls = function()
-            -- make bash-lsp work with zsh (nvim builtin-lsp)
-            require("lspconfig")["bashls"].setup {
+            lspconfig.bashls.setup {
                 filetypes = { "sh", "zsh", "bash", "*zprofile" },
             }
         end,
@@ -31,16 +33,12 @@ require('mason-lspconfig').setup({
             lspconfig.marksman.setup {}
         end,
         dockerls = function()
-            -- To install the server: npm install -g dockerfile-language-server-nodejs
             lspconfig.dockerls.setup {}
         end,
         cssls = function()
-            --Enable (broadcasting) snippet capability for completion
-            local capabilities = vim.lsp.protocol.make_client_capabilities()
-            capabilities.textDocument.completion.completionItem.snippetSupport = true
             lspconfig.cssls.setup {
                 capabilities = capabilities
-            } -- the server can be installed via: npm i -g vscode-langservers-extracted
+            }
         end,
         lua_ls = function()
             local lua_opts = lsp.nvim_lua_ls()
@@ -58,8 +56,10 @@ require('mason-lspconfig').setup({
                     json = {
                         schemas = schemas.json.schemas(),
                         validate = { enable = true },
-                    }
-                }
+                    },
+                },
+                filetypes = { "json", "jsonc", "*json.base" },
+                capabilities = capabilities
             }
         end,
         yamlls = function()
