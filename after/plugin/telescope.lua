@@ -30,11 +30,10 @@ telescope.setup {
 telescope.load_extension('ui-select')
 telescope.load_extension('dap')
 
--- vim.keymap.set('n', '<leader>sF', function() builtin.find_files({ no_ignore = true }) end, { desc = 'Find Files' })
 vim.keymap.set('n', '<leader>sF', "<cmd>Telescope find_files hidden=true no_ignore=true<CR>", { desc = 'Find All Files' })
 vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = 'Find Files' })
 vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = 'Find Grep' })
--- vim.keymap.set('n', '<leader>sG', function() builtin.live_grep { additional_args = { '--no-ignore' } } end,	{ desc = 'Find Grep Including In .gitignore' })
+ vim.keymap.set('n', '<leader>sG', function() builtin.live_grep { additional_args = { '--no-ignore' } } end,	{ desc = 'Find Grep Including In .gitignore' })
 vim.keymap.set('n', '<leader>sG',
 	function()
 		builtin.live_grep { additional_args = function(args)
@@ -59,7 +58,7 @@ end, { desc = 'Find Color Scheme' })
 vim.keymap.set('n', '<leader>sj', builtin.jumplist, { desc = 'Find Jump List' })
 vim.keymap.set('n', '<leader>so', builtin.oldfiles, { desc = 'Find Recent Files' })
 
-vim.keymap.set('n', '<leader>lQ', builtin.quickfix, { desc = 'Find Quick Fixes' })
+vim.keymap.set('n', '<leader>sqf', builtin.quickfix, { desc = 'Find Quick Fixes' })
 vim.keymap.set('n', '<leader>gi', builtin.lsp_implementations, { desc = 'Find Implementations' })
 vim.keymap.set('n', '<leader>gd', builtin.lsp_definitions, { desc = 'Find Definitions' })
 vim.keymap.set('n', '<leader>gD', builtin.lsp_type_definitions, { desc = 'Find Definitions' })
