@@ -43,6 +43,7 @@ vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
 vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/default/plugins.lua<CR>");
 vim.keymap.set("n", "<leader>vkm", "<cmd>e ~/.config/nvim/lua/default/remap.lua<CR>");
+vim.keymap.set("n", "<leader>vtk", "<cmd>e ~/.config/nvim/after/plugin/telescope.lua<CR>", { });
 
 vim.keymap.set("n", "<leader><leader>", function()
     vim.cmd("so")

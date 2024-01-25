@@ -18,8 +18,14 @@ require('mason-lspconfig').setup({
     },
     handlers = {
         lsp.default_setup,
-        docker_compose_language_service =function ()
-            lspconfig.docker_compose_language_service.setup{}
+        bashls = function()
+            -- make bash-lsp work with zsh (nvim builtin-lsp)
+            require("lspconfig")["bashls"].setup {
+                filetypes = { "sh", "zsh", "bash", "*zprofile" },
+            }
+        end,
+        docker_compose_language_service = function()
+            lspconfig.docker_compose_language_service.setup {}
         end,
         marksman = function()
             lspconfig.marksman.setup {}
@@ -58,7 +64,7 @@ require('mason-lspconfig').setup({
         end,
         yamlls = function()
             lspconfig.yamlls.setup {
-                settins = {
+                settings = {
                     yamlls = {
                         schemas = schemas.yaml.schemas(),
                     },

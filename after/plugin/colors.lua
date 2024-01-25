@@ -1,5 +1,3 @@
-require("catppuccin").setup()
-
 require('rose-pine').setup({
     disable_background = true
 })

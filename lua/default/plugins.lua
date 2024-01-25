@@ -1,5 +1,4 @@
 return {
-	{ "catppuccin/nvim", name = "catppuccin", priority = 1000 },
 	{ "folke/tokyonight.nvim", priority = 1000 },
 	{ "rose-pine/neovim", name = "rose-pine" },
 	"nvim-treesitter/nvim-treesitter-context",
@@ -140,13 +139,5 @@ return {
 		"nvimtools/none-ls.nvim",
 		lazy = true,
 		dependencies = { "nvim-lua/plenary.nvim" },
-	},
-	{
-		"nvim-neo-tree/neo-tree.nvim",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"nvim-tree/nvim-web-devicons",
-			"MunifTanjim/nui.nvim",
-		},
-	},
+	}
 }

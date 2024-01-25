@@ -34,3 +34,14 @@ treesitter.setup({             -- enable syntax highlighting
         "scala"
     }
 })
+
+-- use bash-treesitter-parser for zsh
+-- Autocmd that will actually be in charging of starting the whole thing
+local zsh_as_bash_group = vim.api.nvim_create_augroup("zshAsBash", { clear = true })
+
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	group = zsh_as_bash_group,
+	pattern = {"*.sh", "*.zsh", "*zprofile" },
+	command = "silent! set filetype=sh",
+})
+
