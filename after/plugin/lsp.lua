@@ -21,6 +21,41 @@ require('mason-lspconfig').setup({
     },
     handlers = {
         lsp.default_setup,
+        omnisharp = function()
+            local pid = vim.fn.getpid()
+            local home = os.getenv("HOME")
+            local omnisharp_extended = require('omnisharp_extended')
+            require 'lspconfig'.omnisharp.setup {
+                cmd = {
+                    home .. "/.omnisharp/OmniSharp",
+                    '--languageserver',
+                    '--hostPID',
+                    tostring(pid)
+                },
+                enable_roslyn_analysers = true,
+                enable_import_completion = true,
+                organize_imports_on_format = true,
+                filetypes = { 'cs', 'vb', 'csproj', 'sln', 'props' },
+                handlers = {
+                    ["textDocument/definition"] = omnisharp_extended.handler,
+                    ["on_attach"] = function()
+                        vim.keymap.set("n", "<leader>gdr", omnisharp_extended.telescope_lsp_definitions(), {})
+                    end
+                }
+            }
+        end,
+        jsonls = function()
+            lspconfig.jsonls.setup {
+                settings = {
+                    json = {
+                        schemas = schemas.json.schemas(),
+                        validate = { enable = true },
+                    },
+                },
+                filetypes = { "json", "jsonc", "*json.base" },
+                capabilities = capabilities
+            }
+        end,
         bashls = function()
             lspconfig.bashls.setup {
                 filetypes = { "sh", "zsh", "bash", "*zprofile" },
@@ -50,18 +85,6 @@ require('mason-lspconfig').setup({
         tsserver = function()
             lspconfig.tsserver.setup {}
         end,
-        jsonls = function()
-            lspconfig.jsonls.setup {
-                settings = {
-                    json = {
-                        schemas = schemas.json.schemas(),
-                        validate = { enable = true },
-                    },
-                },
-                filetypes = { "json", "jsonc", "*json.base" },
-                capabilities = capabilities
-            }
-        end,
         yamlls = function()
             lspconfig.yamlls.setup {
                 settings = {
@@ -71,29 +94,6 @@ require('mason-lspconfig').setup({
                 },
             }
         end,
-        omnisharp = function()
-            local pid = vim.fn.getpid()
-            local home = os.getenv("HOME")
-            local omnisharp_extended = require('omnisharp_extended')
-            require 'lspconfig'.omnisharp.setup {
-                cmd = {
-                    home .. "/.omnisharp/OmniSharp",
-                    '--languageserver',
-                    '--hostPID',
-                    tostring(pid)
-                },
-                enable_roslyn_analysers = true,
-                enable_import_completion = true,
-                organize_imports_on_format = true,
-                filetypes = { 'cs', 'vb', 'csproj', 'sln', 'props' },
-                handlers = {
-                    ["textDocument/definition"] = omnisharp_extended.handler,
-                    ["on_attach"] = function()
-                        vim.keymap.set("n", "<leader>gdr", omnisharp_extended.telescope_lsp_definitions(), {})
-                    end
-                }
-            }
-        end
     }
 })
 
