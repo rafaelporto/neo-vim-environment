@@ -1,7 +1,7 @@
 local log = require('structlog')
 
 log.configure({
-  logger = {
+  vim_logger = {
     pipelines = {
       {
         level = log.level.INFO,

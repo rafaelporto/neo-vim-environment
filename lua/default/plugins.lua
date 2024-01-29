@@ -41,7 +41,7 @@ return {
 	{ "mfussenegger/nvim-dap", lazy = true },
 	{ "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap" }, lazy = true },
 	{ "theHamsta/nvim-dap-virtual-text", lazy = true },
-	{ "tpope/vim-fugitive", lazy = true },
+	{ "tpope/vim-fugitive", lazy = false },
 	{ "rmagatti/goto-preview", lazy = false },
 	{
 		"ThePrimeagen/harpoon",
