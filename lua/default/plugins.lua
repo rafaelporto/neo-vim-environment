@@ -139,5 +139,16 @@ return {
 		"nvimtools/none-ls.nvim",
 		lazy = true,
 		dependencies = { "nvim-lua/plenary.nvim" },
-	}
+	},
+	{
+		"folke/noice.nvim",
+		event = "VeryLazy",
+		opts = {
+			-- add any options here
+		},
+		dependencies = {
+			"MunifTanjim/nui.nvim",
+			"rcarriga/nvim-notify",
+		},
+	},
 }
