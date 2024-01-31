@@ -151,4 +151,9 @@ return {
 			"rcarriga/nvim-notify",
 		},
 	},
+	{ "hrsh7th/nvim-cmp", lazy = false },
+	{ "hrsh7th/cmp-nvim-lsp", lazy = false },
+	{ "L3MON4D3/LuaSnip", lazy = false },
+	{ "saadparwaiz1/cmp_luasnip", lazy = false },
+	{ "rafamadriz/friendly-snippets", lazy = false },
 }

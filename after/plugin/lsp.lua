@@ -22,17 +22,9 @@ require("mason-lspconfig").setup({
 	handlers = {
 		lsp.default_setup,
 		omnisharp = function()
-			local pid = vim.fn.getpid()
-			local home = os.getenv("HOME")
 			local omnisharp_extended = require("omnisharp_extended")
 			require("lspconfig").omnisharp.setup({
 				capabilities = capabilities,
-				cmd = {
-					home .. "/.omnisharp/OmniSharp",
-					"--languageserver",
-					"--hostPID",
-					tostring(pid),
-				},
 				enable_roslyn_analysers = true,
 				enable_import_completion = true,
 				organize_imports_on_format = true,
