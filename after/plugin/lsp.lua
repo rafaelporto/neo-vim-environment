@@ -37,11 +37,11 @@ require("mason-lspconfig").setup({
 				},
 			})
 		end,
-        gopls = function ()
-            lspconfig.gopls.setup({
-                capabilities = capabilities,
-            })
-        end,
+		gopls = function()
+			lspconfig.gopls.setup({
+				capabilities = capabilities,
+			})
+		end,
 		jsonls = function()
 			lspconfig.jsonls.setup({
 				settings = {
@@ -146,7 +146,7 @@ lsp.on_attach(function(_, bufnr)
 	end, opts)
 	vim.keymap.set("n", "<leader>rn", function()
 		vim.lsp.buf.rename()
-	end, opts)
+	end, { buffer = bufnr, remap = true, desc = "Rename" })
 	vim.keymap.set("i", "<C-h>", function()
 		vim.lsp.buf.signature_help()
 	end, opts)

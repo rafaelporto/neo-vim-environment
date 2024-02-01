@@ -11,7 +11,6 @@ null_ls.setup({
 		null_ls.builtins.diagnostics.clj_kondo,
 		null_ls.builtins.formatting.prettier,
 		null_ls.builtins.formatting.stylua,
-		null_ls.builtins.formatting.codespell,
 		null_ls.builtins.formatting.sqlfmt,
 		null_ls.builtins.formatting.goimports,
 	},
