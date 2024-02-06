@@ -33,6 +33,7 @@ vim.opt.colorcolumn = "80"
 -- conjure
 vim.g["conjure#log#botright"] = true
 vim.g["conjure#debug"] = false
+vim.g["conjure#mapping#doc_word"] = false
 
 -- markdown
 vim.g["mkdp_auto_start"] = 1

@@ -129,7 +129,7 @@ lsp.on_attach(function(_, bufnr)
 	end, opts)
 	vim.keymap.set("n", "gr", function()
 		vim.lsp.buf.references()
-	end, opts)
+	end, { buffer = bufnr, remap = true, desc = "References" })
 
 	-- LSP mappings
 	vim.keymap.set("n", "K", function()

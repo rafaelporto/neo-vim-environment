@@ -1,29 +1,79 @@
-require('rose-pine').setup({
-    disable_background = true
-})
-
-require("tokyonight").setup({
-  -- your configuration comes here
-  -- or leave it empty to use the default settings
-  style = "moon", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-  transparent = true, -- Enable this to disable setting the background color
-  styles = {
-    -- Style to be applied to different syntax groups
-    -- Value is any valid attr-list value for `:help nvim_set_hl`
-    comments = { italic = true },
-    -- Background styles. Can be "dark", "transparent" or "normal"
-    sidebars = "transparent", -- style for sidebars, see below
-    floats = "dark", -- style for floating windows
-  },
-  lualine_bold = true, -- When `true`, section headers in the lualine theme will be bold
-})
-
 function ColorMyPencils(color)
-	color = color or "tokyonight"
+	color = color or "github_dark_dimmed"
 	vim.cmd.colorscheme(color)
 
-	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	--vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+	--vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 end
 
 ColorMyPencils()
+
+local clients_lsp = function()
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    local clients = vim.lsp.buf_get_clients(bufnr)
+    if next(clients) == nil then
+        return ""
+    end
+
+    local c = {}
+    for _, client in pairs(clients) do
+        table.insert(c, client.name)
+    end
+    return "\u{f085} " .. table.concat(c, "|")
+end
+
+require("lualine").setup({
+    options = {
+        icons_enabled = true,
+        theme = "auto",
+        component_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
+        disabled_filetypes = {
+            statusline = {},
+            winbar = {},
+        },
+        ignore_focus = {},
+        always_divide_middle = true,
+        globalstatus = false,
+        refresh = {
+            statusline = 1000,
+            tabline = 1000,
+            winbar = 1000,
+        },
+    },
+    sections = {
+        lualine_a = { "mode" },
+        lualine_b = { "branch", "diff", "diagnostics" },
+        lualine_c = { "filename" },
+        lualine_x = { clients_lsp },
+        lualine_y = { "encoding", "filetype" },
+        lualine_z = { "location" },
+    },
+    inactive_sections = {
+        lualine_a = {},
+        lualine_b = {},
+        lualine_c = { "filename" },
+        lualine_x = { "location" },
+        lualine_y = {},
+        lualine_z = {},
+    },
+    tabline = {
+        lualine_a = {},
+        lualine_b = {},
+        lualine_c = {},
+        lualine_x = {},
+        lualine_y = {},
+        lualine_z = {},
+    },
+    winbar = {},
+    inactive_winbar = {
+        lualine_a = { "filename", "diagnostics" },
+        lualine_b = {},
+        lualine_c = {},
+        lualine_x = {},
+        lualine_y = {},
+        lualine_z = {},
+    },
+    extensions = {},
+})

@@ -25,6 +25,8 @@ vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Sai do modo de inserção" })
 vim.keymap.set("n", "<C-s>", ":w<CR>", { desc = "Salva o arquivo" })
 vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>", { desc = "Salva o arquivo e sai do modo de inserção" })
+vim.keymap.set("n", "<C-q>", ":q<CR>", { desc = "Fecha o buffer" })
+vim.keymap.set("n", "<C-qa>", ":qa<CR>", { desc = "Fecha todos os buffers" })
 
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
