@@ -29,6 +29,7 @@ telescope.setup {
 
 telescope.load_extension('ui-select')
 telescope.load_extension('dap')
+telescope.load_extension('noice')
 
 vim.keymap.set('n', '<leader>stl', builtin.treesitter, { desc = 'Lists Function names, variables, from Treesitter' })
 vim.keymap.set('n', '<leader>sF', "<cmd>Telescope find_files hidden=true no_ignore=true<CR>", { desc = 'Find All Files' })
