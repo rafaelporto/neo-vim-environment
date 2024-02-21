@@ -64,6 +64,7 @@ vim.keymap.set('n', '<leader>sqf', builtin.quickfix, { desc = 'Find Quick Fixes'
 vim.keymap.set('n', '<leader>gi', builtin.lsp_implementations, { desc = 'Find Implementations' })
 vim.keymap.set('n', '<leader>gd', builtin.lsp_definitions, { desc = 'Find Definitions' })
 vim.keymap.set('n', '<leader>gD', builtin.lsp_type_definitions, { desc = 'Find Definitions' })
+vim.keymap.set('n', '<leader>gr', builtin.lsp_references, { desc = 'Find references for word under the cursor' })
 
 vim.keymap.set('n', '<leader>gb', builtin.git_branches, { desc = 'Git Branches' })
 vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = 'Git Status' })
