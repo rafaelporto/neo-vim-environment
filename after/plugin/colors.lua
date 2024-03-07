@@ -6,8 +6,6 @@ function ColorMyPencils(color)
 	--vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 end
 
-ColorMyPencils()
-
 local clients_lsp = function()
 	local bufnr = vim.api.nvim_get_current_buf()
 
@@ -88,3 +86,15 @@ require("lualine").setup({
 	},
 	extensions = {},
 })
+
+require('github-theme').setup({
+  options = {
+    transparent = true,       -- Disable setting background
+  },
+})
+
+require("catppuccin").setup({
+    transparent_background = true
+})
+
+ColorMyPencils()

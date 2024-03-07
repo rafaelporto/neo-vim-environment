@@ -51,3 +51,5 @@ vim.keymap.set("n", "<leader>vtk", "<cmd>e ~/.config/nvim/after/plugin/telescope
 vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
 end)
+
+vim.keymap.set("n", "<leader>sp", "<cmd>echo expand('%')<CR>", { desc = "Exibe o caminho do arquivo" })
