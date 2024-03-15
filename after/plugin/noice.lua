@@ -51,3 +51,24 @@ vim.keymap.set(
 vim.keymap.set("c", "<S-Enter>", function()
   require("noice").redirect(vim.fn.getcmdline())
 end, { desc = "Redirect Cmdline" })
+
+require("notify").setup({
+    icons = {
+      DEBUG = "",
+      ERROR = "",
+      INFO = "",
+      TRACE = "✎",
+      WARN = ""
+    },
+    level = 2,
+    minimum_width = 50,
+    render = "compact",
+    stages = "slide",
+    time_formats = {
+      notification = "%T",
+      notification_history = "%FT%T"
+    },
+    timeout = 5000,
+    top_down = true
+})
+
