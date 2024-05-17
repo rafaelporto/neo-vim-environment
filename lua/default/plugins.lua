@@ -1,10 +1,10 @@
 return {
-    { "folke/tokyonight.nvim",      priority = 1000 },
-    { "rose-pine/neovim",           name = "rose-pine" },
-    { "projekt0n/github-nvim-theme" },
-    { "catppuccin/nvim",            name = "catppuccin", priority = 1000 },
-    { "doums/darcula",              name = "darcula",    priority = 1000 },
-    { "dracula/vim",                name = "dracula",    priority = 1000 },
+    { "folke/tokyonight.nvim",       name = "tokyonight-theme", priority = 1000 },
+    { "rose-pine/neovim",            name = "rose-pine-theme" },
+    { "projekt0n/github-nvim-theme", name = "github-theme" },
+    { "catppuccin/nvim",             name = "catppuccin-theme", priority = 1000 },
+    { "doums/darcula",               name = "darcula-theme",    priority = 1000 },
+    { "dracula/vim",                 name = "dracula-theme",    priority = 1000 },
     "nvim-treesitter/nvim-treesitter-context",
     "mbbill/undotree",
     {
