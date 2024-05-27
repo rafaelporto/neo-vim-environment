@@ -36,8 +36,8 @@ vim.g["conjure#debug"] = false
 vim.g["conjure#mapping#doc_word"] = false
 
 -- markdown
-vim.g["mkdp_auto_start"] = 1
-vim.g["mkdp_refresh_slow"] = 1
+vim.g["mkdp_auto_start"] = 0
+vim.g["mkdp_refresh_slow"] = 0
 
 -- copilot
 vim.g.copilot_assume_mapped = true
