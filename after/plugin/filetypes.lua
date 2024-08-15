@@ -11,8 +11,15 @@ local json_group = vim.api.nvim_create_augroup("jsonFiles", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWinEnter", {
 	group = json_group,
-	pattern = {"*.json", "*.json.base" },
+	pattern = {"*.json", "*.jsonc", "*.json.base" },
 	command = "silent! set filetype=json",
 })
 
+local clojure_group = vim.api.nvim_create_augroup("clojureFiles", { clear = true })
+
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	group = clojure_group,
+	pattern = {"*.clj", "*.cljs", "*.edn", "*.edn.base" },
+	command = "silent! set filetype=clojure",
+})
 
