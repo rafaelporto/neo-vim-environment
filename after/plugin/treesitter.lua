@@ -2,7 +2,7 @@
 local treesitter = require("nvim-treesitter.configs")
 
 -- configure treesitter
-treesitter.setup({             -- enable syntax highlighting
+treesitter.setup({ -- enable syntax highlighting
     highlight = {
         enable = true,
         -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
@@ -28,10 +28,11 @@ treesitter.setup({             -- enable syntax highlighting
         "css",
         "json",
         "markdown",
+        "markdown_inline",
         "sql",
         "yaml",
         "tsx",
-        "scala"
+        "scala",
+        "swift",
     }
 })
-

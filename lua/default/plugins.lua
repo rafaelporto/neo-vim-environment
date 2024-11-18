@@ -159,9 +159,27 @@ return {
             "rcarriga/nvim-notify",
         },
     },
-    { "hrsh7th/nvim-cmp",             lazy = false },
-    { "hrsh7th/cmp-nvim-lsp",         lazy = false },
-    { "L3MON4D3/LuaSnip",             lazy = false },
+    {
+        "hrsh7th/nvim-cmp",
+        lazy = true,
+        event = "InsertEnter",
+        dependencies = {
+            "hrsh7th/cmp-nvim-lsp",
+            "hrsh7th/cmp-path",
+            "hrsh7th/cmp-buffer",
+        },
+    },
+    { "hrsh7th/cmp-path",          lazy = true },
+    { "hrsh7th/cmp-buffer",        lazy = true },
+    { "hrsh7th/cmp-nvim-lsp",      lazy = false },
+    {
+        "L3MON4D3/LuaSnip",
+        lazy = false,
+        conifg = function(opts)
+            require('luasnip').setup(opts)
+            require('luasnip.loaders.from_snipmate').load()
+        end,
+    },
     { "saadparwaiz1/cmp_luasnip",     lazy = false },
     { "rafamadriz/friendly-snippets", lazy = false },
     { "numToStr/Comment.nvim",        lazy = false },
