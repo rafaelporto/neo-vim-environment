@@ -7,16 +7,6 @@ lsp.preset("recommended")
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-lspconfig.sourcekit.setup {
-    capabilities = {
-        workspace = {
-            didChangeWatchedFiles = {
-                dynamicRegistration = true,
-            },
-        },
-    },
-}
-
 require("mason").setup({})
 require("mason-lspconfig").setup({
     ensure_installed = {
@@ -127,63 +117,69 @@ lsp.set_preferences({
     },
 })
 
-lsp.on_attach(function(_, bufnr)
-    local opts = { buffer = bufnr, remap = false }
+vim.api.nvim_create_autocmd('LspAttach', {
+    group = vim.api.nvim_create_augroup("lsp_attach_auto_diag", { clear = true }),
+    callback = function(_, bufnr)
+        local opts = { buffer = bufnr, remap = false }
 
-    -- Goto mappings
-    vim.keymap.set("n", "gd", function()
-        vim.lsp.buf.definition()
-    end, { buffer = bufnr, remap = true, desc = "Go to Definition" })
-    vim.keymap.set("n", "gi", function()
-        vim.lsp.buf.implementation()
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Go to Implementation" })
-    vim.keymap.set("n", "gr", function()
-        vim.lsp.buf.references()
-    end, { buffer = bufnr, remap = true, desc = "References" })
+        vim.keymap.set("n", "<leader>rl",
+            ":LspRestart | LspStart<CR>",
+            { buffer = bufnr, remap = true, desc = "Restart LSP" })
+        -- Goto mappings
+        vim.keymap.set("n", "gd", function()
+            vim.lsp.buf.definition()
+        end, { buffer = bufnr, remap = true, desc = "Go to Definition" })
+        vim.keymap.set("n", "gi", function()
+            vim.lsp.buf.implementation()
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Go to Implementation" })
+        vim.keymap.set("n", "gr", function()
+            vim.lsp.buf.references()
+        end, { buffer = bufnr, remap = true, desc = "References" })
 
-    -- LSP mappings
-    vim.keymap.set("n", "K", function()
-        vim.lsp.buf.hover()
-    end, { buffer = bufnr, remap = true, desc = "Hover" })
-    vim.keymap.set("n", "<leader>vds", function()
-        vim.lsp.buf.document_symbol()
-    end, opts)
-    vim.keymap.set("n", "<leader>vws", function()
-        vim.lsp.buf.workspace_symbol()
-    end, opts)
-    vim.keymap.set("n", "<leader>ca", function()
-        vim.lsp.buf.code_action()
-    end, { buffer = bufnr, remap = true, desc = "Code Action" })
-    vim.keymap.set("n", "<leader>rn", function()
-        vim.lsp.buf.rename()
-    end, { buffer = bufnr, remap = true, desc = "Rename" })
-    vim.keymap.set("i", "<C-h>", function()
-        vim.lsp.buf.signature_help()
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Signature Help" })
+        -- LSP mappings
+        vim.keymap.set("n", "K", function()
+            vim.lsp.buf.hover()
+        end, { buffer = bufnr, remap = true, desc = "Hover" })
+        vim.keymap.set("n", "<leader>vds", function()
+            vim.lsp.buf.document_symbol()
+        end, opts)
+        vim.keymap.set("n", "<leader>vws", function()
+            vim.lsp.buf.workspace_symbol()
+        end, opts)
+        vim.keymap.set("n", "<leader>ca", function()
+            vim.lsp.buf.code_action()
+        end, { buffer = bufnr, remap = true, desc = "Code Action" })
+        vim.keymap.set("n", "<leader>rn", function()
+            vim.lsp.buf.rename()
+        end, { buffer = bufnr, remap = true, desc = "Rename" })
+        vim.keymap.set("i", "<C-h>", function()
+            vim.lsp.buf.signature_help()
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Signature Help" })
 
-    -- Diagnostics
-    vim.keymap.set("n", "<leader>vd", function()
-        vim.diagnostic.open_float()
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Abre diagnóstico em modal" })
-    vim.keymap.set("n", ">d", function()
-        vim.diagnostic.goto_next()
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Próximo diagnóstico" })
-    vim.keymap.set("n", "<d", function()
-        vim.diagnostic.goto_prev()
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Diagnóstico anterior" })
-    vim.keymap.set("n", "<leader>aa", function()
-        vim.diagnostic.setqflist()
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Todos diagnósticos" })
-    vim.keymap.set("n", "<leader>ae", function()
-        vim.diagnostic.setqflist({ severity = "E" }) -- all workspace errors
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Todos os erros do workspace" })
-    vim.keymap.set("n", "<leader>aw", function()
-        vim.diagnostic.setqflist({ severity = "W" }) -- all workspace warnings
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Todos os warnings do workspace" })
-    vim.keymap.set("n", "<leader>d", function()
-        vim.diagnostic.setloclist()
-    end, { buffer = opts.buffer, remap = opts.remap, desc = "Adicionar diagnóstico de buffer à lista de locais" })
-end)
+        -- Diagnostics
+        vim.keymap.set("n", "<leader>vd", function()
+            vim.diagnostic.open_float()
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Abre diagnóstico em modal" })
+        vim.keymap.set("n", ">d", function()
+            vim.diagnostic.goto_next()
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Próximo diagnóstico" })
+        vim.keymap.set("n", "<d", function()
+            vim.diagnostic.goto_prev()
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Diagnóstico anterior" })
+        vim.keymap.set("n", "<leader>aa", function()
+            vim.diagnostic.setqflist()
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Todos diagnósticos" })
+        vim.keymap.set("n", "<leader>ae", function()
+            vim.diagnostic.setqflist({ severity = "E" }) -- all workspace errors
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Todos os erros do workspace" })
+        vim.keymap.set("n", "<leader>aw", function()
+            vim.diagnostic.setqflist({ severity = "W" }) -- all workspace warnings
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Todos os warnings do workspace" })
+        vim.keymap.set("n", "<leader>d", function()
+            vim.diagnostic.setloclist()
+        end, { buffer = opts.buffer, remap = opts.remap, desc = "Adicionar diagnóstico de buffer à lista de locais" })
+    end
+})
 
 vim.diagnostic.config({
     virtual_text = true,
