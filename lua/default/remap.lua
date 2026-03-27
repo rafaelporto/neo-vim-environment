@@ -1,46 +1,46 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Abre a pasta do arquivo"})
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open file explorer" })
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move o texto selecionado para baixo" })
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv" , { desc = "Move o texto selecionado para cima" })
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
 
-vim.keymap.set("n", "J", "mzJ`z", { desc = "Adiciona a linha inferior no final da linha atual e mantem o cursor na posição atual"})
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Desce a página mantendo o cursor no meio do buffer"})
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Sobe a página mantendo o cursor no meio do buffer"})
+vim.keymap.set("n", "J", "mzJ`z", { desc = "Join line below and keep cursor position" })
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center cursor" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center cursor" })
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
 -- greatest remap ever
-vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Remove o testo em destaque e cola o que estiver no buffer"})
+vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over selection without losing buffer" })
 
 -- next greatest remap ever : asbjornHaland
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copia para o clipboard do sistema" })
-vim.keymap.set("n", "<leader>Y", [["+Y]])
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard" })
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Copy line to system clipboard" })
 
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete without copying to buffer" })
 
-vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Sai do modo de inserção" })
-vim.keymap.set("n", "<C-s>", ":w<CR>", { desc = "Salva o arquivo" })
-vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>", { desc = "Salva o arquivo e sai do modo de inserção" })
-vim.keymap.set("n", "<C-q>", ":q<CR>", { desc = "Fecha o buffer" })
-vim.keymap.set("n", "<C-qa>", ":qa<CR>", { desc = "Fecha todos os buffers" })
+vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Exit insert mode" })
+vim.keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save file" })
+vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>", { desc = "Save file and exit insert mode" })
+vim.keymap.set("n", "<C-q>", ":q<CR>", { desc = "Close buffer" })
+vim.keymap.set("n", "<C-qa>", ":qa<CR>", { desc = "Close all buffers" })
 
 vim.keymap.set("n", "Q", "<nop>")
-vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Formata o arquivo"})
+vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "Open tmux sessionizer" })
+vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format file" })
 
 -- quickfix navigation
-vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", {desc = "Próximo diagnóstico"})
-vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", {desc = "Diagnóstico anterior"})
-vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", {desc = "Próximo diagnóstico local"})
-vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", {desc = "Diagnóstico local anterior"})
+vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next local quickfix item" })
+vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous local quickfix item" })
 
--- replace na palavra em que o cursor estiver
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+-- replace word under cursor
+vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word under cursor" })
 
--- tornar o arquivo aberto em executável
+-- make current file executable
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
 vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/default/plugins.lua<CR>")
@@ -51,30 +51,4 @@ vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
 end)
 
-vim.keymap.set("n", "<leader>sp", "<cmd>echo expand('%')<CR>", { desc = "Exibe o caminho do arquivo" })
-
--- xcode remaps
-vim.keymap.set("n", "<leader>X", "<cmd>XcodebuildPicker<cr>", { desc = "Show Xcodebuild Actions" })
-vim.keymap.set("n", "<leader>xf", "<cmd>XcodebuildProjectManager<cr>", { desc = "Show Project Manager Actions" })
-
-vim.keymap.set("n", "<leader>xb", "<cmd>XcodebuildBuild<cr>", { desc = "Build Project" })
-vim.keymap.set("n", "<leader>xB", "<cmd>XcodebuildBuildForTesting<cr>", { desc = "Build For Testing" })
-vim.keymap.set("n", "<leader>xr", "<cmd>XcodebuildBuildRun<cr>", { desc = "Build & Run Project" })
-
-vim.keymap.set("n", "<leader>xt", "<cmd>XcodebuildTest<cr>", { desc = "Run Tests" })
-vim.keymap.set("v", "<leader>xt", "<cmd>XcodebuildTestSelected<cr>", { desc = "Run Selected Tests" })
-vim.keymap.set("n", "<leader>xT", "<cmd>XcodebuildTestClass<cr>", { desc = "Run Current Test Class" })
-vim.keymap.set("n", "<leader>x.", "<cmd>XcodebuildTestRepeat<cr>", { desc = "Repeat Last Test Run" })
-
-vim.keymap.set("n", "<leader>xl", "<cmd>XcodebuildToggleLogs<cr>", { desc = "Toggle Xcodebuild Logs" })
-vim.keymap.set("n", "<leader>xc", "<cmd>XcodebuildToggleCodeCoverage<cr>", { desc = "Toggle Code Coverage" })
-vim.keymap.set("n", "<leader>xC", "<cmd>XcodebuildShowCodeCoverageReport<cr>", { desc = "Show Code Coverage Report" })
-vim.keymap.set("n", "<leader>xe", "<cmd>XcodebuildTestExplorerToggle<cr>", { desc = "Toggle Test Explorer" })
-vim.keymap.set("n", "<leader>xs", "<cmd>XcodebuildFailingSnapshots<cr>", { desc = "Show Failing Snapshots" })
-
-vim.keymap.set("n", "<leader>xd", "<cmd>XcodebuildSelectDevice<cr>", { desc = "Select Device" })
-vim.keymap.set("n", "<leader>xp", "<cmd>XcodebuildSelectTestPlan<cr>", { desc = "Select Test Plan" })
-vim.keymap.set("n", "<leader>xq", "<cmd>Telescope quickfix<cr>", { desc = "Show QuickFix List" })
-
-vim.keymap.set("n", "<leader>xx", "<cmd>XcodebuildQuickfixLine<cr>", { desc = "Quickfix Line" })
-vim.keymap.set("n", "<leader>xa", "<cmd>XcodebuildCodeActions<cr>", { desc = "Show Code Actions" })
+vim.keymap.set("n", "<leader>sp", "<cmd>echo expand('%')<CR>", { desc = "Show current file path" })

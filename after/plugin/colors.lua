@@ -6,7 +6,7 @@ end
 local clients_lsp = function()
     local bufnr = vim.api.nvim_get_current_buf()
 
-    local clients = vim.lsp.buf_get_clients(bufnr)
+    local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if next(clients) == nil then
         return ""
     end
@@ -98,5 +98,5 @@ local time = os.date("*t")
 if time.hour < 8 or time.hour >= 17 then
     ColorMyPencils("dracula")
 else
-    ColorMyPencils("catppuccin-latte")
+    ColorMyPencils("tokyonight-day")
 end

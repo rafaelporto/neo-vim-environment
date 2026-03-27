@@ -5,8 +5,8 @@ local theme = require('telescope.themes')
 telescope.setup {
 	defaults = {
 		mappings = {
-			i = { ["<C-t>"] = require('trouble.providers.telescope').open_with_trouble },
-			n = { ["<C-t>"] = require('trouble.providers.telescope').open_with_trouble },
+			i = { ["<C-t>"] = require('trouble.sources.telescope').open },
+			n = { ["<C-t>"] = require('trouble.sources.telescope').open },
 		}
 	},
 	extensions = {
@@ -35,7 +35,6 @@ vim.keymap.set('n', '<leader>stl', builtin.treesitter, { desc = 'Lists Function 
 vim.keymap.set('n', '<leader>sF', "<cmd>Telescope find_files hidden=true no_ignore=true<CR>", { desc = 'Find All Files' })
 vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = 'Find Files' })
 vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = 'Find Grep' })
- vim.keymap.set('n', '<leader>sG', function() builtin.live_grep { additional_args = { '--no-ignore' } } end,	{ desc = 'Find Grep Including In .gitignore' })
 vim.keymap.set('n', '<leader>sG',
 	function()
 		builtin.live_grep { additional_args = function(args)
@@ -77,4 +76,3 @@ vim.keymap.set('n', '<leader>sT', builtin.builtin, { desc = 'Find Telescope cach
 vim.keymap.set('n', '<leader>ps', function()
     builtin.grep_string({ search = vim.fn.input("Grep > ") })
 end)
-vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})

@@ -1,8 +1,6 @@
 local goto = require('goto-preview')
 
-goto.setup {
-
-}
+goto.setup()
 
 vim.keymap.set('n', '<leader>pd', '<cmd>lua require("goto-preview").goto_preview_definition()<CR>', { desc = "Preview Definition", silent = true })
 vim.keymap.set('n', '<leader>pt', '<cmd>lua require("goto-preview").goto_preview_type_definition()<CR>', { desc = "Preview Type Definition", silent = true })

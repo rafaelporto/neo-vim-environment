@@ -16,13 +16,18 @@ return {
     "clojure-vim/vim-jack-in",
     "radenling/vim-dispatch-neovim",
     {
-        "neovim/nvim-lspconfig",
-        cmd = "LspInfo",
-        event = { "BufReadPre", "BufNewFile" },
-        dependencies = {
-            { "hrsh7th/cmp-nvim-lsp" },
-        },
+        "williamboman/mason.nvim",
+        build = function()
+            pcall(vim.cmd, "MasonUpdate")
+        end,
     },
+    {
+        "williamboman/mason-lspconfig.nvim",
+        dependencies = { "williamboman/mason.nvim" },
+    },
+    -- Kept for its lsp/<server>.lua configs (cmd, filetypes, root_markers).
+    -- Do NOT call require("lspconfig") — use vim.lsp.config instead.
+    { "neovim/nvim-lspconfig" },
     "hoffs/omnisharp-extended-lsp.nvim",
     { "ray-x/lsp_signature.nvim",     lazy = true },
     {
@@ -36,11 +41,9 @@ return {
         lazy = true,
     },
     { "aznhe21/actions-preview.nvim", lazy = true },
-    { "folke/neodev.nvim",            lazy = true },
     { "tpope/vim-surround",           lazy = false },
     { "Tastyep/structlog.nvim",       lazy = true },
     { "RRethy/vim-illuminate",        lazy = false },
-    { "numToStr/Comment.nvim",        lazy = true },
     { "mfussenegger/nvim-dap",        lazy = true },
     {
         "rcarriga/nvim-dap-ui",
@@ -61,28 +64,6 @@ return {
             { "nvim-lua/plenary.nvim" },
         },
     },
-    {
-        "VonHeikemen/lsp-zero.nvim",
-        branch = "v2.x",
-        dependencies = {
-            -- LSP Support
-            { "neovim/nvim-lspconfig",            event = { "BufReadPre", "BufNewFile" }, lazy = true }, -- Required
-            {
-                -- Optional
-                "williamboman/mason.nvim",
-                build = function()
-                    pcall(vim.cmd, "MasonUpdate")
-                end,
-            },
-            { "williamboman/mason-lspconfig.nvim" }, -- Optional
-
-            -- Autocompletion
-            { "hrsh7th/nvim-cmp",                 lazy = true }, -- Required
-            { "hrsh7th/cmp-nvim-lsp",             lazy = true }, -- Required
-            { "L3MON4D3/LuaSnip",                 lazy = true }, -- Required
-        },
-        lazy = false,
-    },
     { "HiPhish/rainbow-delimiters.nvim",        lazy = true },
     { "b0o/schemastore.nvim",                   lazy = true },
     { "nvim-telescope/telescope-ui-select.nvim" },
@@ -100,10 +81,6 @@ return {
         end,
     },
     { "julienvincent/nvim-paredit" },
-    {
-        "rose-pine/neovim",
-        name = "rose-pine",
-    },
     {
         "nvim-treesitter/nvim-treesitter",
         event = { "BufReadPre", "BufNewFile" },
@@ -175,7 +152,7 @@ return {
     {
         "L3MON4D3/LuaSnip",
         lazy = false,
-        conifg = function(opts)
+        config = function(opts)
             require('luasnip').setup(opts)
             require('luasnip.loaders.from_snipmate').load()
         end,

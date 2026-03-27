@@ -1,5 +1,3 @@
-local lspconfig = require("lspconfig")
-local cmp_nvim_lsp = require("cmp_nvim_lsp")
 local keymap = vim.keymap -- for conciseness
 local opts = { noremap = true, silent = true }
 local on_attach = function(_, bufnr)
@@ -35,17 +33,13 @@ local on_attach = function(_, bufnr)
     end, { desc = "Lint file" })
 end
 
-local capabilities = cmp_nvim_lsp.default_capabilities()
-
-local defaultLSPs = {
-    "sourcekit",
+vim.lsp.config["sourcekit"] = {
+    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    on_attach = on_attach,
+    cmd = { vim.trim(vim.fn.system("xcrun -f sourcekit-lsp")) },
 }
 
-lspconfig.sourcekit.setup({
-    capabilities = capabilities,
-    on_attach = on_attach,
-    cmd = { vim.trim(vim.fn.system("xcrun -f sourcekit-lsp")) } or nil,
-})
+vim.lsp.enable("sourcekit")
 
 local conform = require("conform")
 
@@ -74,7 +68,7 @@ lint.linters_by_ft = {
 
 local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
 
-vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave", "TextChanged" }, {
+vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
     group = lint_augroup,
     callback = function()
         if not vim.endswith(vim.fn.bufname(), "swiftinterface") then
