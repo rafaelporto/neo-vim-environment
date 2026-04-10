@@ -114,7 +114,7 @@ On first launch, [lazy.nvim](https://github.com/folke/lazy.nvim) bootstraps itse
 | Clojure | `clojure_lsp` | conjure (REPL), vim-jack-in, nvim-paredit, rainbow-delimiters |
 | Swift / iOS | `sourcekit-lsp` | xcodebuild.nvim, swiftformat, swiftlint |
 | Scala | nvim-metals | Full metals integration |
-| C# | `omnisharp` | omnisharp-extended-lsp (telescope integration) |
+| C# | `roslyn` (seblj/roslyn.nvim) | csharpier (formatting), netcoredbg (DAP) |
 | TypeScript / JS | `ts_ls`, `eslint` | — |
 | Go | `gopls` | — |
 | Lua | `lua_ls` | Neovim API workspace aware |
@@ -123,6 +123,8 @@ On first launch, [lazy.nvim](https://github.com/folke/lazy.nvim) bootstraps itse
 | Docker | `dockerls` | — |
 
 LSP servers are installed via **Mason** (`:Mason`).
+
+> **Roslyn (C#) requires manual installation:** run `:MasonInstall roslyn` inside Neovim after first launch. The `seblj/roslyn.nvim` plugin manages the LSP lifecycle but does not auto-download the server binary. See the [nvim-lspconfig docs](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#roslyn_ls) for details.
 
 ## Colorscheme
 

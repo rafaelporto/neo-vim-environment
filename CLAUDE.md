@@ -24,9 +24,11 @@ After plugins load, Neovim's `after/plugin/` directory is sourced automatically.
 - `lua/default/plugins.lua` — lazy.nvim specs (what to install, lazy-load conditions)
 - `after/plugin/<name>.lua` — actual configuration for each plugin
 
-**LSP uses nvim 0.11+ native API**, not the old nvim-lspconfig setup pattern. Use `vim.lsp.config["server_name"]` and `vim.lsp.enable()` instead of `require("lspconfig").server.setup()`.
+**LSP uses nvim 0.11+ native API**, not the old nvim-lspconfig setup pattern. Use `vim.lsp.config["server_name"]` and `vim.lsp.enable()` instead of `require("lspconfig").server.setup()`. For server-specific config options, available servers, and filetype/root detection rules, refer to the [nvim-lspconfig documentation](https://github.com/neovim/nvim-lspconfig).
 
 **Mason** manages LSP server installation. Servers are listed in `mason-lspconfig` ensure list in `after/plugin/lsp.lua`.
+
+> **Exception — Roslyn (C#):** The Roslyn language server is **not** auto-installed. Install it manually inside Neovim with `:MasonInstall roslyn`. The `seblj/roslyn.nvim` plugin manages the LSP lifecycle but expects the binary to already exist in Mason's bin directory. See: https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#roslyn_ls
 
 **Time-based colorscheme switching** in `after/plugin/colors.lua`: before 8am or after 5pm → `dracula`, 8am–5pm → `tokyonight-day`. The `ColorMyPencils()` function handles this.
 
@@ -37,7 +39,7 @@ After plugins load, Neovim's `after/plugin/` directory is sourced automatically.
 | Clojure | clojure_lsp | conjure (REPL), vim-jack-in, nvim-paredit |
 | Swift/iOS | sourcekit-lsp | xcodebuild.nvim, conform.nvim (swiftformat), nvim-lint (swiftlint) |
 | Scala | nvim-metals | separate setup in `after/plugin/nvim-metals.lua` |
-| C# | omnisharp | omnisharp-extended-lsp for telescope integration |
+| C# | roslyn (seblj/roslyn.nvim) — **requires manual server install** | csharpier (none-ls), netcoredbg (DAP) |
 | TypeScript | ts_ls + eslint | — |
 | Lua | lua_ls | workspace configured for nvim API |
 | JSON/YAML | jsonls + yamlls | schemastore.nvim for schema validation |

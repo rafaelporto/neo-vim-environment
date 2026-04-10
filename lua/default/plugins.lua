@@ -28,7 +28,11 @@ return {
     -- Kept for its lsp/<server>.lua configs (cmd, filetypes, root_markers).
     -- Do NOT call require("lspconfig") — use vim.lsp.config instead.
     { "neovim/nvim-lspconfig" },
-    "hoffs/omnisharp-extended-lsp.nvim",
+    {
+        "seblj/roslyn.nvim",
+        ft = { "cs" },
+        dependencies = { "nvim-telescope/telescope.nvim" },
+    },
     { "ray-x/lsp_signature.nvim",     lazy = true },
     {
         "nvim-neotest/neotest",
