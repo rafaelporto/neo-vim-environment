@@ -5,7 +5,6 @@ return {
     { "catppuccin/nvim",             name = "catppuccin-theme", priority = 1000 },
     { "doums/darcula",               name = "darcula-theme",    priority = 1000 },
     { "dracula/vim",                 name = "dracula-theme",    priority = 1000 },
-    "nvim-treesitter/nvim-treesitter-context",
     "mbbill/undotree",
     {
         "github/copilot.vim",
@@ -38,7 +37,6 @@ return {
         "nvim-neotest/neotest",
         dependencies = {
             "nvim-lua/plenary.nvim",
-            "nvim-treesitter/nvim-treesitter",
             "antoinemadec/FixCursorHold.nvim",
             "Issafalcon/neotest-dotnet",
         },
@@ -85,15 +83,6 @@ return {
         end,
     },
     { "julienvincent/nvim-paredit" },
-    {
-        "nvim-treesitter/nvim-treesitter",
-        event = { "BufReadPre", "BufNewFile" },
-        build = ":TSUpdate",
-        dependencies = {
-            "nvim-treesitter/nvim-treesitter-textobjects",
-            "windwp/nvim-ts-autotag",
-        },
-    },
     {
         "Olical/conjure",
         ft = { "clojure" }, -- languages
@@ -174,7 +163,6 @@ return {
         "MunifTanjim/nui.nvim",
         "nvim-tree/nvim-tree.lua",     -- (optional) to manage project files
         "stevearc/oil.nvim",           -- (optional) to manage project files
-        "nvim-treesitter/nvim-treesitter", -- (optional) for Quick tests support (required Swift parser)
     },
     config = function()
         require("xcodebuild").setup({
