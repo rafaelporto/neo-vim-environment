@@ -112,7 +112,7 @@ On first launch, [lazy.nvim](https://github.com/folke/lazy.nvim) bootstraps itse
 | Language | LSP | Tools |
 |---|---|---|
 | Clojure | `clojure_lsp` | conjure (REPL), vim-jack-in, nvim-paredit, rainbow-delimiters |
-| Swift / iOS | `sourcekit-lsp` | xcodebuild.nvim, swiftformat, swiftlint |
+| Swift / iOS | `sourcekit-lsp` | xcodebuild.nvim, swiftformat, swiftlint, codelldb (DAP) |
 | Scala | nvim-metals | Full metals integration |
 | C# | `roslyn` (seblj/roslyn.nvim) | csharpier (formatting), netcoredbg (DAP) |
 | TypeScript / JS | `ts_ls`, `eslint` | — |
@@ -149,18 +149,63 @@ Powered by `nvim-cmp` + `LuaSnip`:
 
 ## Swift / iOS Development
 
-Full Xcode integration via `xcodebuild.nvim`:
+Full Xcode integration via `xcodebuild.nvim`. On first use, the plugin will prompt you to select a scheme and device — the selection is saved per project.
+
+### Build & Run
 
 | Key | Action |
 |---|---|
+| `<leader>X` | Menu with all Xcodebuild actions |
+| `<leader>xf` | Project Manager |
 | `<leader>xb` | Build |
-| `<leader>xr` | Build & Run |
-| `<leader>xt` | Run tests |
-| `<leader>xc` | Toggle code coverage |
-| `<leader>xd` | Select device |
-| `<leader>xs` | Select scheme |
+| `<leader>xB` | Build for testing |
+| `<leader>xr` | Build & Run on simulator/device |
+| `<leader>xd` | Select device / simulator |
+| `<leader>xp` | Select test plan |
+| `<leader>xl` | Toggle build logs |
+| `<leader>xq` | Show quickfix list |
+| `<leader>xx` | Quickfix current line |
+| `<leader>xa` | Code actions |
 
-Auto-format on save with `swiftformat`; lint with `swiftlint`.
+### Tests & Coverage
+
+| Key | Action |
+|---|---|
+| `<leader>xt` | Run all tests |
+| `<leader>xt` (visual) | Run selected tests |
+| `<leader>xT` | Run tests in current class |
+| `<leader>x.` | Repeat last test run |
+| `<leader>xe` | Toggle Test Explorer |
+| `<leader>xc` | Toggle code coverage |
+| `<leader>xC` | Show code coverage report |
+| `<leader>xs` | Show failing snapshots |
+
+### Formatting & Linting
+
+- **swiftformat** runs automatically on save
+- **swiftlint** runs on save and on leaving insert mode (`<leader>ml` to run manually)
+
+### Debugging (DAP)
+
+Requires `codelldb` — install once with `:MasonInstall codelldb`.
+
+**Workflow:**
+
+1. Start the app on the simulator with `<leader>xr`
+2. Set a breakpoint with `F9`
+3. Press `F5` — codelldb attaches to the running process automatically
+4. The DAP UI opens with scopes, call stack, breakpoints, and console
+
+| Key | Action |
+|---|---|
+| `F9` | Toggle breakpoint |
+| `F5` | Start / continue |
+| `F10` | Step over |
+| `F11` | Step into |
+| `Shift+F11` | Step out |
+| `Shift+F5` | Stop debug session |
+| `<leader>du` | Toggle DAP UI |
+| `<leader>duc` | Close DAP UI |
 
 ## Clojure Development
 
