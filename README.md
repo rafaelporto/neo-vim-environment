@@ -1,13 +1,13 @@
 # neo-vim-environment
 
-Personal Neovim configuration targeting **nvim 0.11+**, with full LSP, DAP, tree-sitter, and multi-language support.
+Personal Neovim configuration for **nvim 0.11+**. Uses `lazy.nvim` for plugin management and the native LSP API (`vim.lsp.config` / `vim.lsp.enable`). Supports Clojure, Swift/iOS, Dart/Flutter, Scala, C#, Go, TypeScript, and more.
 
 ## Requirements
 
 - Neovim 0.11+
 - Git
-- A [Nerd Font](https://www.nerdfonts.com/) (for icons in the statusline and diagnostics)
-- Language-specific external tools (formatters, linters) installed via Mason inside Neovim
+- [Nerd Font](https://www.nerdfonts.com/) — icons in statusline and diagnostics
+- External tools (formatters, linters, debug adapters) installed via `:Mason` inside Neovim
 
 ## Install
 
@@ -17,205 +17,81 @@ git clone https://github.com/rafaelporto/neo-vim-environment.git ~/.config/nvim
 
 On first launch, [lazy.nvim](https://github.com/folke/lazy.nvim) bootstraps itself and installs all plugins automatically.
 
-## Structure
+> **Roslyn (C#):** must be installed manually with `:MasonInstall roslyn` inside Neovim.
+> **Flutter/Dart:** `dartls` ships with the Flutter SDK — no Mason install needed.
 
-| Purpose | Path |
+## Plugins
+
+### UI & Navigation
+
+| Plugin | Purpose |
 |---|---|
-| Entry point | `init.lua` |
-| Vim options | `lua/default/set.lua` |
-| Keybindings | `lua/default/remap.lua` |
-| Plugin manager bootstrap | `lua/default/lazy.lua` |
-| Plugin specs | `lua/default/plugins.lua` |
-| Plugin configs | `after/plugin/<name>.lua` |
-| Snippets | `snippets/` |
+| [nvim-lualine/lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) | Statusline with LSP clients, branch, diagnostics |
+| [folke/noice.nvim](https://github.com/folke/noice.nvim) | Command palette, LSP doc borders, notification routing |
+| [rcarriga/nvim-notify](https://github.com/rcarriga/nvim-notify) | Notification backend for noice |
+| [nvim-neo-tree/neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim) | File explorer (`<leader>e`) |
+| [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) | Fuzzy finder — files, grep, LSP, git, DAP |
+| [nvim-telescope/telescope-ui-select.nvim](https://github.com/nvim-telescope/telescope-ui-select.nvim) | Dropdown picker for code actions and selects |
+| [ThePrimeagen/harpoon](https://github.com/ThePrimeagen/harpoon) | Per-project file marks with instant navigation |
+| [folke/trouble.nvim](https://github.com/folke/trouble.nvim) | Diagnostics list, quickfix, LSP results |
+| [rmagatti/goto-preview](https://github.com/rmagatti/goto-preview) | LSP peek in floating windows |
+| [mbbill/undotree](https://github.com/mbbill/undotree) | Visual undo history (`<leader>u`) |
+| [iamcco/markdown-preview.nvim](https://github.com/iamcco/markdown-preview.nvim) | Live Markdown preview in browser |
 
-## Keybindings
+### LSP & Completion
 
-**Leader:** `Space` — **Local leader:** `,`
-
-### Navigation
-
-| Key | Action |
+| Plugin | Purpose |
 |---|---|
-| `<leader>pv` | File explorer |
-| `<C-f>` | Open tmux-sessionizer |
-| `<C-d>` / `<C-u>` | Scroll and center |
-| `n` / `N` | Next/prev search result (centered) |
-
-### Telescope (fuzzy finder)
-
-| Key | Action |
-|---|---|
-| `<leader>pf` | Find files |
-| `<leader>sg` | Live grep |
-| `<C-p>` | Git files |
-| `<leader>sb` | Open buffers |
-| `<leader>gd` | LSP definitions |
-| `<leader>gi` | LSP implementations |
-| `<leader>gr` | LSP references |
-| `<leader>gb` | Git branches |
-| `<leader>gs` | Git status |
-
-### Harpoon (quick marks)
-
-| Key | Action |
-|---|---|
-| `<leader>a` | Add file to harpoon |
-| `<C-e>` | Toggle harpoon menu |
-| `<C-h/j/k/l>` | Jump to mark 1–4 |
-
-### LSP
-
-| Key | Action |
-|---|---|
-| `K` | Hover docs |
-| `gd` | Go to definition |
-| `gi` | Go to implementation |
-| `gr` | References |
-| `<leader>rn` | Rename symbol |
-| `<leader>ca` | Code actions |
-| `<leader>f` | Format file |
-| `[d` / `]d` | Prev/next diagnostic |
-| `<leader>e` | Show diagnostic float |
-
-### Editing
-
-| Key | Action |
-|---|---|
-| `J` / `K` (visual) | Move selection up/down |
-| `<leader>p` (visual) | Paste without yanking |
-| `<leader>y` / `<leader>Y` | Yank to system clipboard |
-| `<leader>s` | Replace word under cursor (global) |
-| `<leader>x` | Make file executable |
-
-### Buffers & Quickfix
-
-| Key | Action |
-|---|---|
-| `<C-s>` | Save |
-| `<C-q>` | Close buffer |
-| `<C-k>` / `<C-j>` | Quickfix next/prev |
-| `<leader>k` / `<leader>j` | Loclist next/prev |
-
-### Config shortcuts
-
-| Key | Action |
-|---|---|
-| `<leader>vpp` | Edit `plugins.lua` |
-| `<leader>vkm` | Edit `remap.lua` |
-| `<leader>vtk` | Edit `telescope.lua` |
-| `<leader><leader>` | Reload current file (`:so`) |
-| `<leader>sp` | Show current file path |
-
-## Language Support
-
-| Language | LSP | Tools |
-|---|---|---|
-| Clojure | `clojure_lsp` | conjure (REPL), vim-jack-in, nvim-paredit, rainbow-delimiters |
-| Swift / iOS | `sourcekit-lsp` | xcodebuild.nvim, swiftformat, swiftlint, codelldb (DAP) |
-| Scala | nvim-metals | Full metals integration |
-| C# | `roslyn` (seblj/roslyn.nvim) | csharpier (formatting), netcoredbg (DAP) |
-| TypeScript / JS | `ts_ls`, `eslint` | — |
-| Go | `gopls` | — |
-| Lua | `lua_ls` | Neovim API workspace aware |
-| JSON | `jsonls` | schemastore.nvim validation |
-| YAML | `yamlls` | schemastore.nvim validation |
-| Docker | `dockerls` | — |
-
-LSP servers are installed via **Mason** (`:Mason`).
-
-> **Roslyn (C#) requires manual installation:** run `:MasonInstall roslyn` inside Neovim after first launch. The `seblj/roslyn.nvim` plugin manages the LSP lifecycle but does not auto-download the server binary. See the [nvim-lspconfig docs](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#roslyn_ls) for details.
-
-## Colorscheme
-
-The theme switches automatically based on time of day:
-
-- **Before 8am / after 5pm** → [Dracula](https://github.com/dracula/vim)
-- **8am – 5pm** → [Tokyo Night Day](https://github.com/folke/tokyonight.nvim)
-
-Other available themes: `catppuccin`, `rose-pine`, `github-theme`, `darcula`. Change manually with `:colorscheme <name>` or by calling `ColorMyPencils("<name>")`.
-
-## Completion
-
-Powered by `nvim-cmp` + `LuaSnip`:
-
-| Key | Action |
-|---|---|
-| `<C-Space>` | Trigger completion |
-| `<C-n>` / `<C-p>` | Next/prev item |
-| `<CR>` | Confirm selection |
-| `<C-e>` | Abort |
-| `<C-f>` / `<C-b>` | Scroll snippet forward/back |
-
-## Swift / iOS Development
-
-Full Xcode integration via `xcodebuild.nvim`. On first use, the plugin will prompt you to select a scheme and device — the selection is saved per project.
-
-### Build & Run
-
-| Key | Action |
-|---|---|
-| `<leader>X` | Menu with all Xcodebuild actions |
-| `<leader>xf` | Project Manager |
-| `<leader>xb` | Build |
-| `<leader>xB` | Build for testing |
-| `<leader>xr` | Build & Run on simulator/device |
-| `<leader>xd` | Select device / simulator |
-| `<leader>xp` | Select test plan |
-| `<leader>xl` | Toggle build logs |
-| `<leader>xq` | Show quickfix list |
-| `<leader>xx` | Quickfix current line |
-| `<leader>xa` | Code actions |
-
-### Tests & Coverage
-
-| Key | Action |
-|---|---|
-| `<leader>xt` | Run all tests |
-| `<leader>xt` (visual) | Run selected tests |
-| `<leader>xT` | Run tests in current class |
-| `<leader>x.` | Repeat last test run |
-| `<leader>xe` | Toggle Test Explorer |
-| `<leader>xc` | Toggle code coverage |
-| `<leader>xC` | Show code coverage report |
-| `<leader>xs` | Show failing snapshots |
-
-### Formatting & Linting
-
-- **swiftformat** runs automatically on save
-- **swiftlint** runs on save and on leaving insert mode (`<leader>ml` to run manually)
+| [williamboman/mason.nvim](https://github.com/williamboman/mason.nvim) | LSP server / tool installer |
+| [williamboman/mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim) | Auto-install servers via Mason |
+| [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) | Bundled LSP server definitions (cmd, filetypes, root markers) |
+| [hrsh7th/nvim-cmp](https://github.com/hrsh7th/nvim-cmp) | Completion engine |
+| [L3MON4D3/LuaSnip](https://github.com/L3MON4D3/LuaSnip) | Snippet engine (VSCode + SnipMate formats) |
+| [rafamadriz/friendly-snippets](https://github.com/rafamadriz/friendly-snippets) | Community snippet collection |
+| [ray-x/lsp_signature.nvim](https://github.com/ray-x/lsp_signature.nvim) | Signature help while typing |
+| [aznhe21/actions-preview.nvim](https://github.com/aznhe21/actions-preview.nvim) | Rich preview for code actions (`<leader>ca`) |
+| [b0o/schemastore.nvim](https://github.com/b0o/schemastore.nvim) | JSON/YAML schema validation via SchemaStore |
+| [nvimtools/none-ls.nvim](https://github.com/nvimtools/none-ls.nvim) | Formatters and linters as LSP sources |
+| [stevearc/conform.nvim](https://github.com/stevearc/conform.nvim) | Format-on-save (Swift, Dart) |
+| [mfussenegger/nvim-lint](https://github.com/mfussenegger/nvim-lint) | Async linting (Swift) |
 
 ### Debugging (DAP)
 
-Requires `codelldb` — install once with `:MasonInstall codelldb`.
-
-**Workflow:**
-
-1. Start the app on the simulator with `<leader>xr`
-2. Set a breakpoint with `F9`
-3. Press `F5` — codelldb attaches to the running process automatically
-4. The DAP UI opens with scopes, call stack, breakpoints, and console
-
-| Key | Action |
+| Plugin | Purpose |
 |---|---|
-| `F9` | Toggle breakpoint |
-| `F5` | Start / continue |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift+F11` | Step out |
-| `Shift+F5` | Stop debug session |
-| `<leader>du` | Toggle DAP UI |
-| `<leader>duc` | Close DAP UI |
+| [mfussenegger/nvim-dap](https://github.com/mfussenegger/nvim-dap) | Debug Adapter Protocol core |
+| [rcarriga/nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui) | DAP UI (scopes, watches, console, REPL) |
+| [theHamsta/nvim-dap-virtual-text](https://github.com/theHamsta/nvim-dap-virtual-text) | Inline variable values during debug |
+| [nvim-telescope/telescope-dap.nvim](https://github.com/nvim-telescope/telescope-dap.nvim) | Telescope integration for DAP |
+| [nvim-neotest/neotest](https://github.com/nvim-neotest/neotest) | Test runner framework |
 
-## Clojure Development
+### Git
 
-| Tool | Purpose |
+| Plugin | Purpose |
 |---|---|
-| conjure | Interactive REPL evaluation (local leader `,`) |
-| vim-jack-in | Start nREPL from Neovim |
-| nvim-paredit | Structural editing (slurp/barf) |
-| cmp-conjure | REPL-aware completions |
+| [tpope/vim-fugitive](https://github.com/tpope/vim-fugitive) | Git integration (`:Git`, `<leader>gs`) |
 
-## Debugging
+### Editing
 
-DAP (Debug Adapter Protocol) via `nvim-dap` + `nvim-dap-ui`. Telescope integration for browsing breakpoints and frames (`:Telescope dap ...`).
+| Plugin | Purpose |
+|---|---|
+| [github/copilot.vim](https://github.com/github/copilot.vim) | AI completions (`<C-j>` to accept) |
+| [numToStr/Comment.nvim](https://github.com/numToStr/Comment.nvim) | Toggle comments (`gcc`, `gc`) |
+| [tpope/vim-surround](https://github.com/tpope/vim-surround) | Surround motions (`ys`, `cs`, `ds`) |
+| [folke/todo-comments.nvim](https://github.com/folke/todo-comments.nvim) | Highlight and navigate TODO/FIXME/etc |
+| [RRethy/vim-illuminate](https://github.com/RRethy/vim-illuminate) | Highlight all occurrences of word under cursor |
+| [HiPhish/rainbow-delimiters.nvim](https://github.com/HiPhish/rainbow-delimiters.nvim) | Rainbow bracket coloring |
+
+### Language-specific
+
+| Plugin | Purpose |
+|---|---|
+| [Olical/conjure](https://github.com/Olical/conjure) | Clojure REPL evaluation |
+| [clojure-vim/vim-jack-in](https://github.com/clojure-vim/vim-jack-in) | Start nREPL from Neovim |
+| [julienvincent/nvim-paredit](https://github.com/julienvincent/nvim-paredit) | Structural Clojure editing |
+| [scalameta/nvim-metals](https://github.com/scalameta/nvim-metals) | Scala LSP + DAP via Metals |
+| [seblj/roslyn.nvim](https://github.com/seblj/roslyn.nvim) | C# LSP via Roslyn |
+| [wojciech-kulik/xcodebuild.nvim](https://github.com/wojciech-kulik/xcodebuild.nvim) | Xcode build/test/run/coverage integration |
+| [akinsho/flutter-tools.nvim](https://github.com/akinsho/flutter-tools.nvim) | Dart/Flutter LSP, hot reload, DAP |
+
+See [doc/](doc/) for per-plugin configuration guides and per-language setup + debug workflows.
