@@ -75,4 +75,4 @@ vim.keymap.set('n', '<leader>sT', builtin.builtin, { desc = 'Find Telescope cach
 
 vim.keymap.set('n', '<leader>ps', function()
     builtin.grep_string({ search = vim.fn.input("Grep > ") })
-end)
+end, { desc = "Grep string input" })

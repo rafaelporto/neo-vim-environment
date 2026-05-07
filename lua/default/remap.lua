@@ -9,8 +9,8 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
 vim.keymap.set("n", "J", "mzJ`z", { desc = "Join line below and keep cursor position" })
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center cursor" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center cursor" })
-vim.keymap.set("n", "n", "nzzzv")
-vim.keymap.set("n", "N", "Nzzzv")
+vim.keymap.set("n", "n", "nzzzv", { desc = "Next search result centered" })
+vim.keymap.set("n", "N", "Nzzzv", { desc = "Prev search result centered" })
 
 -- greatest remap ever
 vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste over selection without losing buffer" })
@@ -27,7 +27,7 @@ vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>", { desc = "Save file and exit insert 
 vim.keymap.set("n", "<C-q>", ":q<CR>", { desc = "Close buffer" })
 vim.keymap.set("n", "<C-qa>", ":qa<CR>", { desc = "Close all buffers" })
 
-vim.keymap.set("n", "Q", "<nop>")
+vim.keymap.set("n", "Q", "<nop>", { desc = "Disable ex mode" })
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "Open tmux sessionizer" })
 vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format file" })
 
@@ -41,14 +41,14 @@ vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous local qu
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word under cursor" })
 
 -- make current file executable
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
+vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
 
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/default/plugins.lua<CR>")
-vim.keymap.set("n", "<leader>vkm", "<cmd>e ~/.config/nvim/lua/default/remap.lua<CR>")
-vim.keymap.set("n", "<leader>vtk", "<cmd>e ~/.config/nvim/after/plugin/telescope.lua<CR>", {})
+vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/default/plugins.lua<CR>", { desc = "Edit plugins.lua" })
+vim.keymap.set("n", "<leader>vkm", "<cmd>e ~/.config/nvim/lua/default/remap.lua<CR>", { desc = "Edit remap.lua" })
+vim.keymap.set("n", "<leader>vtk", "<cmd>e ~/.config/nvim/after/plugin/telescope.lua<CR>", { desc = "Edit telescope.lua" })
 
 vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
-end)
+end, { desc = "Source current file" })
 
 vim.keymap.set("n", "<leader>sp", "<cmd>echo expand('%')<CR>", { desc = "Show current file path" })
