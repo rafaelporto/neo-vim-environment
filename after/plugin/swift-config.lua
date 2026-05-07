@@ -47,6 +47,7 @@ local conform = require("conform")
 conform.setup({
     formatters_by_ft = {
         swift = { "swiftformat" },
+        dart = { "dart_format" },
     },
     format_on_save = function(bufnr)
         local ignore_filetypes = { "oil" }

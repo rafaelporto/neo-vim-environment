@@ -30,6 +30,8 @@ After plugins load, Neovim's `after/plugin/` directory is sourced automatically.
 
 > **Exception — Roslyn (C#):** The Roslyn language server is **not** auto-installed. Install it manually inside Neovim with `:MasonInstall roslyn`. The `seblj/roslyn.nvim` plugin manages the LSP lifecycle but expects the binary to already exist in Mason's bin directory. See: https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#roslyn_ls
 
+> **Exception — Flutter/Dart:** `dartls` is **not** installed via Mason. It is bundled with the Flutter SDK at `~/sdk-flutter`. The `akinsho/flutter-tools.nvim` plugin manages both LSP and debug adapter lifecycle. If you move the SDK, update the path in `after/plugin/flutter.lua`.
+
 **Time-based colorscheme switching** in `after/plugin/colors.lua`: before 8am or after 5pm → `dracula`, 8am–5pm → `tokyonight-day`. The `ColorMyPencils()` function handles this.
 
 ## Language Support
@@ -38,6 +40,7 @@ After plugins load, Neovim's `after/plugin/` directory is sourced automatically.
 |---|---|---|
 | Clojure | clojure_lsp | conjure (REPL), vim-jack-in, nvim-paredit |
 | Swift/iOS | sourcekit-lsp | xcodebuild.nvim, conform.nvim (swiftformat), nvim-lint (swiftlint) |
+| Dart/Flutter | dartls (via flutter-tools.nvim) | flutter-tools.nvim (hot reload, devices, emulators, outline), conform.nvim (dart_format), Dart DAP (bundled with SDK) |
 | Scala | nvim-metals | separate setup in `after/plugin/nvim-metals.lua` |
 | C# | roslyn (seblj/roslyn.nvim) — **requires manual server install** | csharpier (none-ls), netcoredbg (DAP) |
 | TypeScript | ts_ls + eslint | — |
@@ -48,6 +51,22 @@ After plugins load, Neovim's `after/plugin/` directory is sourced automatically.
 
 - Leader: `<space>`
 - Local leader: `,` (used in Clojure/conjure mappings)
+
+### Flutter keymaps (`<leader>F` prefix, active on Dart buffers)
+
+| Key | Action |
+|---|---|
+| `<leader>FR` | Flutter Run |
+| `<leader>Fr` | Hot Reload |
+| `<leader>FH` | Hot Restart |
+| `<leader>Fq` | Flutter Quit |
+| `<leader>Fd` | Select Device |
+| `<leader>Fe` | Select Emulator |
+| `<leader>FD` | Open DevTools |
+| `<leader>Fo` | Toggle Widget Outline |
+| `<leader>Fl` | Restart LSP |
+
+**Debugging Flutter:** use standard DAP keymaps — `F5` (continue/start), `F9` (toggle breakpoint), `F10` (step over), `F11` (step into), `<S-F11>` (step out), `<S-F5>` (stop). The debug adapter (`flutter debug_adapter`) is bundled with the Flutter SDK — no extra install needed. Set `run_via_dap = true` in `after/plugin/flutter.lua` to launch apps through DAP (enables breakpoints from the start).
 
 ## Adding a New Plugin
 

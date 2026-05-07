@@ -169,6 +169,11 @@ return {
             -- put some options here or leave it empty to use default settings
         })
     end},
+{
+    "akinsho/flutter-tools.nvim",
+    ft = { "dart" },
+    dependencies = { "nvim-lua/plenary.nvim" },
+},
 {"stevearc/conform.nvim", lazy = true },
 {"mfussenegger/nvim-lint", lazy = true },
 {
