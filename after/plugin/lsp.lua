@@ -101,6 +101,22 @@ vim.lsp.config["lua_ls"] = {
 	},
 }
 
+-- ─── Enable servers ──────────────────────────────────────────────────────────
+vim.lsp.enable({
+	"ts_ls",
+	"eslint",
+	"clojure_lsp",
+	"gopls",
+	"cssls",
+	"marksman",
+	"dockerls",
+	"docker_compose_language_service",
+	"bashls",
+	"jsonls",
+	"yamlls",
+	"lua_ls",
+})
+
 -- ─── Keymaps (LspAttach) ──────────────────────────────────────────────────────
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("lsp_attach_auto_diag", { clear = true }),
