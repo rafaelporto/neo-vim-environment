@@ -71,7 +71,11 @@ metals_config.on_attach = function(_, bufnr)
     map("n", "<leader>aa",   function() vim.diagnostic.setqflist() end,       "All diagnostics → quickfix")
     map("n", "<leader>ae",   function() vim.diagnostic.setqflist({ severity = "E" }) end, "Workspace errors → quickfix")
     map("n", "<leader>aw",   function() vim.diagnostic.setqflist({ severity = "W" }) end, "Workspace warnings → quickfix")
-    map("n", "<leader>d",    function() vim.diagnostic.setloclist() end,      "Buffer diagnostics → loclist")
+    -- <leader>ad, não <leader>d: alinhado com lsp.lua. Aqui o problema era
+    -- duplo — sombreava o delete-sem-yank global de remap.lua:22 E era
+    -- mapeamento completo com 7 atalhos <leader>d* de DAP logo abaixo, então
+    -- cada um deles pagava timeoutlen em buffer Scala.
+    map("n", "<leader>ad",   function() vim.diagnostic.setloclist() end,      "Buffer diagnostics → loclist")
 
     -- Metals
     map("n", "<leader>ws",   function() require("metals").hover_worksheet() end, "Metals hover worksheet")
