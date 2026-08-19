@@ -171,36 +171,94 @@ return {
         })
     end},
 {
+    -- NOTA: a config fica inline aqui, não em after/plugin/, de propósito.
+    -- ft = { "dart" } mantém o flutter-tools, seus ~25 comandos e a fiação de
+    -- DAP fora de toda sessão não-Dart; um after/plugin/flutter.lua rodaria no
+    -- startup e faria require() sempre, desfazendo isso — foi essa classe de
+    -- problema que o commit 72413e7 corrigiu.
     "akinsho/flutter-tools.nvim",
     ft = { "dart" },
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
-        local flutter_sdk = vim.fn.expand("~/sdk-flutter")
-        require("flutter-tools").setup({
-            flutter_path = flutter_sdk .. "/bin/flutter",
+        -- O flutter-tools já busca o SDK nesta ordem (executable.lua M.get):
+        --   config.fvm -> config.flutter_path -> flutter_lookup_cmd -> exepath
+        -- Por isso NÃO definimos flutter_path a menos que o SDK esteja em lugar
+        -- não-padrão: fazê-lo curto-circuita a cadeia na 2ª posição, que era
+        -- exatamente o bug do "~/sdk-flutter" fixo (diretório inexistente).
+        local function find_flutter()
+            -- No PATH: homebrew cask, asdf/mise, instalação com bin/ no PATH.
+            if vim.fn.exepath("flutter") ~= "" then
+                return {} -- deixa o flutter-tools resolver
+            end
+
+            -- FVM por projeto (.fvm/flutter_sdk).
+            if vim.fs.find(".fvm", { path = vim.uv.cwd(), upward = true, type = "directory" })[1] then
+                return { fvm = true }
+            end
+
+            -- Locais conhecidos fora do PATH, incluindo o default global do FVM.
+            for _, candidate in ipairs({
+                "~/fvm/default/bin/flutter",
+                "~/development/flutter/bin/flutter",
+                "~/flutter/bin/flutter",
+                "~/sdk-flutter/bin/flutter",
+            }) do
+                local bin = vim.fn.expand(candidate)
+                if vim.fn.executable(bin) == 1 then
+                    return { flutter_path = bin }
+                end
+            end
+
+            return nil
+        end
+
+        local sdk = find_flutter()
+        if not sdk then
+            -- Sem SDK, não chamar setup(): evita entregar um flutter_path
+            -- inexistente e curto-circuitar a busca do plugin.
+            --
+            -- Sem notify próprio de propósito. O ftplugin/dart/init.lua do
+            -- flutter-tools chama lsp.attach() em todo buffer .dart de qualquer
+            -- forma, e o get_server_config já avisa "Flutter executable could
+            -- not be found..." explicando como resolver. Um vim.notify aqui
+            -- daria duas mensagens para o mesmo problema.
+            return
+        end
+
+        require("flutter-tools").setup(vim.tbl_extend("error", sdk, {
             widget_guides = { enabled = false },
             closing_tags = {
-                highlight = "ErrorMsg",
+                -- Era ErrorMsg, o que fazia toda closing tag parecer uma falha.
+                highlight = "Comment",
                 prefix = " // ",
                 enabled = true,
             },
             dev_log = {
                 enabled = true,
-                open_cmd = "tabedit",
+                -- Era "tabedit", que rouba uma aba a cada run; um split embaixo
+                -- mantém o código visível. Alterna com <leader>FL.
+                open_cmd = "botright 15split",
             },
             debugger = {
+                -- Só isto já roteia o FlutterRun pelo DAP. run_via_dap foi
+                -- REMOVIDO do flutter-tools (zero ocorrências na fonte) — a
+                -- opção que estava aqui era morta.
                 enabled = true,
-                run_via_dap = true,
                 exception_breakpoints = {},
+                evaluate_to_string_in_debug_views = true,
             },
             lsp = {
                 capabilities = require("cmp_nvim_lsp").default_capabilities(),
+                -- NÃO definir analysisExcludedFolders aqui: o default do plugin
+                -- já exclui <sdk>/packages e <sdk>/.pub-cache, e o merge é
+                -- tbl_deep_extend("force"), então uma lista nossa apagaria as
+                -- duas. Para excluir pasta gerada, usar analysis_options.yaml.
+                -- completeFunctionCalls, showTodos e updateImportsOnRename já
+                -- são default (lsp/init.lua) — estavam duplicados aqui.
                 settings = {
-                    showTodos = true,
-                    completeFunctionCalls = true,
                     renameFilesWithClasses = "prompt",
                     enableSnippets = true,
-                    updateImportsOnRename = true,
+                    lineLength = 100,
                 },
                 on_attach = function(_, bufnr)
                     local function map(key, cmd, desc)
@@ -215,9 +273,11 @@ return {
                     map("<leader>Fl", "<cmd>FlutterLspRestart<cr>", "Flutter LSP Restart")
                     map("<leader>Fo", "<cmd>FlutterOutlineToggle<cr>", "Flutter Outline")
                     map("<leader>FD", "<cmd>FlutterDevTools<cr>", "Flutter DevTools")
+                    map("<leader>Fp", "<cmd>FlutterPubGet<cr>", "Flutter Pub Get")
+                    map("<leader>FL", "<cmd>FlutterLogToggle<cr>", "Toggle Flutter Log")
                 end,
             },
-        })
+        }))
     end,
 },
 {"stevearc/conform.nvim", lazy = true },
