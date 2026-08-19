@@ -55,6 +55,8 @@ Configuration in `after/plugin/telescope.lua`.
 | `<leader>sd` | Diagnostics |
 | `<leader>stl` | Treesitter symbols |
 
+> `<leader>stl` needs a treesitter parser for the buffer's language. With only the 7 parsers nvim ships it worked almost nowhere; the parsers installed by `nvim-treesitter` (see [editing-tools.md](editing-tools.md)) cover 32 languages now.
+
 ### Git
 
 | Key | Action |

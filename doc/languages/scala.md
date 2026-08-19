@@ -43,7 +43,9 @@ Metals attaches via a `FileType scala,sbt` autocmd that calls `require("metals")
 | `<leader>aa` | All diagnostics → quickfix |
 | `<leader>ae` | Workspace errors → quickfix |
 | `<leader>aw` | Workspace warnings → quickfix |
-| `<leader>d` | Buffer diagnostics → loclist |
+| `<leader>d` | Buffer diagnostics → loclist (Metals' own map — see the note below) |
+
+> **Buffer diagnostics are on `<leader>ad`, not `<leader>d`.** `nvim-metals.lua` registers its own keymap set, so it had its own copy of this binding; both it and the one in `lsp.lua` were moved. Being buffer-local, `<leader>d` shadowed the global delete-without-yank (`<leader>dd`, `<leader>dw`), and in Scala buffers it was also a complete mapping sitting in front of seven `<leader>d*` DAP maps, so each of those paid `timeoutlen`.
 
 ### DAP (Metals-native)
 
@@ -58,6 +60,10 @@ Metals attaches via a `FileType scala,sbt` autocmd that calls `require("metals")
 | `<leader>dl` | Run last |
 
 > These Metals DAP keymaps are separate from the global DAP keymaps (F5/F9/F10/F11) defined in `debugging.lua`. Both sets work in Scala buffers.
+
+## Formatting
+
+There is no `scala` entry in `after/plugin/formatting.lua`, so `<leader>f` (now `conform.format`, not `vim.lsp.buf.format`) falls through to `lsp_format = "fallback"` and Metals formats the buffer with the project's scalafmt configuration. The same happens on save.
 
 ## DAP Configurations
 

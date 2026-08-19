@@ -17,7 +17,6 @@ Configuration in `after/plugin/completions.lua`.
 | `luasnip` | Snippets |
 | `buffer` | Words in current buffer |
 | `path` | Filesystem paths |
-| `conjure` | Clojure REPL symbols (injected for Clojure buffers only) |
 
 ## Keymaps
 

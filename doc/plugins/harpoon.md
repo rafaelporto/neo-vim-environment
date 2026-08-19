@@ -18,3 +18,5 @@ Harpoon maintains a per-project list of file marks (up to 4 slots). Marks persis
 | `<leader>4` | Jump to mark slot 4 |
 
 > **Note:** `<C-e>` also closes the nvim-cmp completion menu (abort), but cmp is only active in insert mode while harpoon uses normal mode — no conflict.
+
+> **Note:** `<leader>a` is a complete mapping, but it is also the prefix of the `<leader>a` diagnostics maps (`aa`, `ae`, `aw`, `ad`, `aq` — see [keymaps.md](keymaps.md)). It still works, it just fires after `timeoutlen` instead of immediately.

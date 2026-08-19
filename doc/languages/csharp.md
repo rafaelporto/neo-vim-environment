@@ -1,6 +1,6 @@
 # C# (.NET)
 
-Configuration in `after/plugin/roslyn.lua` and `after/plugin/dap-dotnet.lua`.
+Configuration in `after/plugin/roslyn.lua`, `after/plugin/dap-dotnet.lua`, `after/plugin/formatting.lua` (csharpier) and `after/plugin/neotest.lua` (tests).
 
 ## LSP
 
@@ -21,11 +21,13 @@ Note the string-call form — not the bracket form used for other servers.
 |---|---|
 | `<leader>gdr` | Telescope definitions (muscle-memory alias from old OmniSharp setup) |
 
-All standard LSP keymaps also apply (see [lsp-core.md](../plugins/lsp-core.md)).
+All standard LSP keymaps also apply (see [lsp-core.md](../plugins/lsp-core.md)). Buffer diagnostics go to the loclist with `<leader>ad` — not `<leader>d`, which stayed the global delete-without-yank. `<leader>lh` (toggle inlay hints) and `<leader>lc` (run code lens) are created only when Roslyn advertises the matching capability.
 
 ## Formatting
 
-`csharpier` via none-ls — runs with `<leader>f`.
+`csharpier` via conform.nvim (`after/plugin/formatting.lua`) — runs on save and with `<leader>f`, which now calls `conform.format` instead of `vim.lsp.buf.format`.
+
+The binary is not installed automatically; add it with `:MasonInstall csharpier` (or `dotnet tool install -g csharpier`). Without it, `lsp_format = "fallback"` lets Roslyn format the buffer instead.
 
 ## Debugging (DAP)
 
@@ -62,4 +64,18 @@ Uses `netcoredbg`. Install once with `:MasonInstall netcoredbg`.
 
 ## Testing
 
-`neotest-dotnet` is available as a neotest adapter (`Issafalcon/neotest-dotnet`) but has no keymaps configured yet.
+`neotest-dotnet` (`Issafalcon/neotest-dotnet`) is registered in `after/plugin/neotest.lua` — `require("neotest").setup()` used never to be called anywhere, so the adapter was dead weight. It is registered bare (no call), like `neotest-vitest`.
+
+| Key | Action |
+|---|---|
+| `<leader>tt` | Run nearest test |
+| `<leader>tf` | Run current file |
+| `<leader>ta` | Run whole suite |
+| `<leader>tD` | Debug nearest test (via `netcoredbg`) |
+| `<leader>tl` | Re-run last |
+| `<leader>tS` | Stop run |
+| `<leader>ts` | Toggle summary panel |
+| `<leader>to` | Open output for the nearest test |
+| `<leader>tp` | Toggle output panel |
+| `<leader>tw` | Toggle watch mode for the file |
+| `]n` / `[n` | Jump to next / previous failed test |

@@ -1,6 +1,6 @@
 # Lua
 
-Configuration in `after/plugin/lsp.lua` (lua_ls block).
+Configuration in `after/plugin/lsp.lua` (lua_ls block) and `after/plugin/formatting.lua` (stylua).
 
 ## LSP
 
@@ -22,10 +22,16 @@ This means `vim.*` APIs autocomplete and have type information only when editing
 
 - `diagnostics.globals = { "vim" }` — suppresses "undefined global `vim`" warnings
 
+### Inlay hints
+
+`lua_ls` advertises `textDocument/inlayHint`, so the `LspAttach` handler enables hints and creates `<leader>lh` to toggle them. Note that lua-language-server only *emits* hints when `Lua.hint.enable = true`, which this config does not set — add it to the `settings.Lua` block if you want them.
+
 ## Formatting
 
-`stylua` via none-ls — runs with `<leader>f`. Requires `stylua` in PATH or installed via Mason (`:MasonInstall stylua`).
+`stylua` via conform.nvim (`after/plugin/formatting.lua`) — runs on save and with `<leader>f`, which calls `conform.format` (it used to call `vim.lsp.buf.format`). Requires `stylua` in PATH or installed via Mason (`:MasonInstall stylua`); otherwise `lsp_format = "fallback"` lets `lua_ls` format.
+
+Config lives in `.stylua.toml` / `stylua.toml` at the project root.
 
 ## All standard LSP keymaps apply
 
-See [lsp-core.md](../plugins/lsp-core.md).
+See [lsp-core.md](../plugins/lsp-core.md). Buffer diagnostics go to the loclist with `<leader>ad` — `<leader>d` stayed the global delete-without-yank.

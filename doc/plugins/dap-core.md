@@ -1,6 +1,6 @@
 # DAP Core
 
-Configuration in `after/plugin/debugging.lua`.
+Shared configuration in `after/plugin/debugging.lua`. Adapters live one file per language.
 
 ## Stack
 
@@ -35,26 +35,56 @@ The UI opens automatically when a session starts (`attach` or `launch`) and clos
 | `<leader>du` | Toggle DAP UI |
 | `<leader>duc` | Close DAP UI |
 
-## Go Adapter (delve)
-
-Configured in `debugging.lua`. Requires `dlv` in PATH.
-
-| Configuration | Description |
-|---|---|
-| Debug | Launch current file |
-| Debug test | Launch current file in test mode |
-| Debug test (go.mod) | Launch test in relative directory |
-
 ## Language-specific adapters
 
-Each language has its own adapter file:
+One file per language — `debugging.lua` holds only the UI and the global keymaps.
 
-| Language | File | Adapter |
-|---|---|---|
-| Swift/iOS | `after/plugin/dap-swift.lua` | codelldb (`:MasonInstall codelldb`) |
-| C# | `after/plugin/dap-dotnet.lua` | netcoredbg (`:MasonInstall netcoredbg`) |
-| Scala | `after/plugin/nvim-metals.lua` | metals DAP (built-in) |
-| Dart/Flutter | `after/plugin/flutter.lua` | flutter debug_adapter (bundled with SDK) |
-| Go | `after/plugin/debugging.lua` | delve (`dlv` in PATH) |
+| Language | File | Adapter | Install |
+|---|---|---|---|
+| Go | `after/plugin/dap-go.lua` | `go` (delve) | `:MasonInstall delve` |
+| JS / TS | `after/plugin/dap-js.lua` | `pwa-node`, `pwa-chrome` (js-debug-adapter) | `:MasonInstall js-debug-adapter` |
+| C# | `after/plugin/dap-dotnet.lua` | `coreclr` (netcoredbg) | `:MasonInstall netcoredbg` |
+| Swift / iOS | `after/plugin/dap-swift.lua` | wired by xcodebuild.nvim | none — Xcode 16+ needs no `codelldb` |
+| Scala | `after/plugin/nvim-metals.lua` | metals DAP (built-in) | none |
+| Dart / Flutter | `lua/default/plugins.lua` (flutter-tools spec) | `flutter debug_adapter` | none — bundled with the SDK |
+
+> There is **no** `after/plugin/flutter.lua`. Flutter's config is inline in the `akinsho/flutter-tools.nvim` spec in `lua/default/plugins.lua`, deliberately: `ft = { "dart" }` keeps the plugin, its ~25 commands and its DAP wiring out of every non-Dart session, which an `after/plugin/` file would undo by running at startup.
+
+> `after/plugin/dap-swift.lua` only calls `require("xcodebuild.integrations.dap").setup()`. It does not use `codelldb`.
 
 See the corresponding language doc for debug workflows.
+
+## Go — `after/plugin/dap-go.lua`
+
+`dlv` resolves from Mason's `bin` directory, falling back to `PATH`.
+
+> **The adapter is named `go`, not `delve`.** nvim-dap resolves an adapter by a configuration's `type`, and `go` is the name `neotest-golang` expects in its `dap_manual_config` (see [neotest.md](neotest.md)) — so one name serves both.
+
+| Configuration | Request | Description |
+|---|---|---|
+| `Debug arquivo atual` | `launch` | `program = ${file}` |
+| `Debug pacote` | `launch` | `program = ./${relativeFileDirname}` |
+| `Debug testes do pacote` | `launch`, `mode = test` | all tests in the current package |
+| `Attach a processo` | `attach`, `mode = local` | process picker |
+
+Debugging a *single* test comes from neotest (`<leader>tD`), so there is no per-test configuration here.
+
+## JavaScript / TypeScript — `after/plugin/dap-js.lua`
+
+Adapter names follow vscode-js-debug: `pwa-node` and `pwa-chrome`, both run as `type = "server"` on `${port}`.
+
+The file returns early and silently if `js-debug-adapter` is not in Mason's `bin` — no startup warning for a tool you may not want.
+
+The same 5 configurations are registered for `javascript`, `typescript`, `javascriptreact` and `typescriptreact`:
+
+| Configuration | Adapter | Request | Notes |
+|---|---|---|---|
+| `Launch arquivo atual` | `pwa-node` | `launch` | `program = ${file}`; Node's native type stripping runs `.ts` directly, so there is no `ts-node`/`tsx` config |
+| `Launch npm script` | `pwa-node` | `launch` | Prompts for the script name (defaults to `dev`) in an `integratedTerminal` |
+| `Attach a processo` | `pwa-node` | `attach` | Process picker |
+| `Launch Chrome em localhost` | `pwa-chrome` | `launch` | Prompts for a URL (defaults to `http://localhost:3000`) |
+| `Attach ao Chrome` | `pwa-chrome` | `attach` | Port `9222` — start Chrome with `--remote-debugging-port=9222` |
+
+`runtimeArgs` and `url` are **functions**, so the prompt fires on `F5` and not at startup. All node configs set `sourceMaps = true` and skip `<node_internals>` and `node_modules`.
+
+Test debugging comes from neotest (`<leader>tD`), so there is no jest/vitest configuration here.
