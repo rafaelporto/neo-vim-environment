@@ -8,7 +8,7 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 require("mason").setup({})
 require("mason-lspconfig").setup({
 	ensure_installed = {
-		"ts_ls",
+		"vtsls",
 		"eslint",
 		"gopls",
 		"lua_ls",
@@ -16,6 +16,10 @@ require("mason-lspconfig").setup({
 		"jsonls",
 		"dockerls",
 	},
+	-- mason-lspconfig auto-habilita todo servidor instalado. ts_ls nunca deve
+	-- subir junto do vtsls (diagnostics duplicados + memória dobrada), então
+	-- fica excluído aqui como garantia caso o pacote seja reinstalado.
+	automatic_enable = { exclude = { "ts_ls" } },
 })
 
 -- ─── Diagnostics ──────────────────────────────────────────────────────────────
@@ -33,17 +37,10 @@ vim.diagnostic.config({
 
 -- ─── Server configurations ────────────────────────────────────────────────────
 
--- Simple servers (capabilities only)
-for _, server in ipairs({
-	"ts_ls",
-	"eslint",
-	"cssls",
-	"marksman",
-	"dockerls",
-	"docker_compose_language_service",
-}) do
-	vim.lsp.config[server] = { capabilities = capabilities }
-end
+-- Camada de merge 1: vale para TODO servidor, inclusive os configurados fora
+-- deste arquivo (sourcekit, dartls). Substitui o antigo loop por servidor, que
+-- tinha de ser mantido em sincronia com a lista do vim.lsp.enable abaixo.
+vim.lsp.config("*", { capabilities = capabilities })
 
 -- ─── Go ───────────────────────────────────────────────────────────────────────
 -- Antes o gopls só recebia `capabilities` pelo loop acima, ou seja nenhum
@@ -86,6 +83,66 @@ vim.lsp.config["gopls"] = {
 				rangeVariableTypes = true,
 			},
 		},
+	},
+}
+
+-- ─── TypeScript / JavaScript (vtsls) ─────────────────────────────────────────
+-- vtsls no lugar do ts_ls: expõe todo o namespace de settings do VSCode, então
+-- inlay hints e preferences de import são configuráveis por workspace. O
+-- typescript-language-server só aceita preferences via initializationOptions.
+-- Nunca habilitar os dois juntos (ver automatic_enable.exclude acima).
+local ts_inlay_hints = {
+	parameterNames = { enabled = "literals", suppressWhenArgumentMatchesName = true },
+	parameterTypes = { enabled = true },
+	variableTypes = { enabled = false, suppressWhenTypeMatchesName = true },
+	propertyDeclarationTypes = { enabled = true },
+	functionLikeReturnTypes = { enabled = true },
+}
+
+local ts_preferences = {
+	importModuleSpecifier = "shortest",
+	importModuleSpecifierEnding = "auto",
+	includePackageJsonAutoImports = "auto",
+	preferTypeOnlyAutoImports = true,
+}
+
+vim.lsp.config["vtsls"] = {
+	settings = {
+		vtsls = {
+			autoUseWorkspaceTsdk = true, -- respeita o typescript do projeto
+			enableMoveToFileCodeAction = true,
+			experimental = {
+				completion = { enableServerSideFuzzyMatch = true },
+				maxInlayHintLength = 30,
+			},
+		},
+		typescript = {
+			inlayHints = vim.tbl_extend("error", ts_inlay_hints, {
+				enumMemberValues = { enabled = true }, -- chave só de typescript
+			}),
+			preferences = ts_preferences,
+			updateImportsOnFileMove = { enabled = "always" },
+			suggest = { completeFunctionCalls = true },
+		},
+		javascript = {
+			inlayHints = ts_inlay_hints,
+			preferences = ts_preferences,
+			updateImportsOnFileMove = { enabled = "always" },
+			suggest = { completeFunctionCalls = true },
+		},
+	},
+}
+
+-- O lsp/eslint.lua do nvim-lspconfig já fornece workingDirectory mode "auto",
+-- workspace_required, um root_dir que se recusa a anexar sem config de eslint no
+-- projeto, e um on_attach que cria o :LspEslintFixAll.
+-- NÃO definir on_attach aqui: substituiria aquele e destruiria o comando, que o
+-- after/plugin/formatting.lua usa no save.
+vim.lsp.config["eslint"] = {
+	settings = {
+		-- Só lint. Formatação é do prettier/biome via conform; deixar true
+		-- permitiria o fallback do conform eleger o eslint como formatter.
+		format = false,
 	},
 }
 
@@ -145,7 +202,7 @@ vim.lsp.config["lua_ls"] = {
 
 -- ─── Enable servers ──────────────────────────────────────────────────────────
 vim.lsp.enable({
-	"ts_ls",
+	"vtsls",
 	"eslint",
 	"gopls",
 	"cssls",
@@ -226,6 +283,20 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		-- Code lens: o gopls expõe generate, tidy, test e run_govulncheck aqui.
 		-- Gated por capability, então é no-op em servidores que não implementam.
 		local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+		-- Inlay hints: gated por capability, então é no-op em servidores que não
+		-- implementam textDocument/inlayHint — o dartls entre eles, cujo
+		-- equivalente são as closing labels do flutter-tools.
+		if client and client:supports_method("textDocument/inlayHint") then
+			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+			vim.keymap.set("n", "<leader>lh", function()
+				vim.lsp.inlay_hint.enable(
+					not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }),
+					{ bufnr = bufnr }
+				)
+			end, { buffer = bufnr, desc = "Toggle inlay hints" })
+		end
+
 		if client and client:supports_method("textDocument/codeLens") then
 			vim.keymap.set("n", "<leader>lc", vim.lsp.codelens.run,
 				{ buffer = bufnr, desc = "Run code lens" })

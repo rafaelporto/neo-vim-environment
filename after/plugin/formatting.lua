@@ -13,20 +13,27 @@ conform.setup({
         -- Web: biome se o projeto tiver biome.json, senão prettier, senão nada.
         -- Os dois resolvem o binário de ./node_modules/.bin
         -- (conform util.from_node_modules), então nada é instalado global.
-        javascript      = { "biome", "prettier", stop_after_first = true },
-        javascriptreact = { "biome", "prettier", stop_after_first = true },
-        typescript      = { "biome", "prettier", stop_after_first = true },
-        typescriptreact = { "biome", "prettier", stop_after_first = true },
-        json            = { "biome", "prettier", stop_after_first = true },
-        jsonc           = { "biome", "prettier", stop_after_first = true },
-        css             = { "prettier" },
-        html            = { "prettier" },
-        yaml            = { "prettier" },
-        markdown        = { "prettier" },
-        graphql         = { "prettier" },
+        --
+        -- lsp_format = "never" aqui é essencial: sem isso o "fallback" global
+        -- manda o vtsls/jsonls formatar quando o projeto não tem config de
+        -- prettier, com os defaults do tsserver — anulando o require_cwd e
+        -- reformatando exatamente os repos que optaram por não usar prettier.
+        -- Verificado: `const   x:number=1` virava `const x: number = 1`.
+        javascript      = { "biome", "prettier", stop_after_first = true, lsp_format = "never" },
+        javascriptreact = { "biome", "prettier", stop_after_first = true, lsp_format = "never" },
+        typescript      = { "biome", "prettier", stop_after_first = true, lsp_format = "never" },
+        typescriptreact = { "biome", "prettier", stop_after_first = true, lsp_format = "never" },
+        json            = { "biome", "prettier", stop_after_first = true, lsp_format = "never" },
+        jsonc           = { "biome", "prettier", stop_after_first = true, lsp_format = "never" },
+        css             = { "prettier", lsp_format = "never" },
+        html            = { "prettier", lsp_format = "never" },
+        yaml            = { "prettier", lsp_format = "never" },
+        markdown        = { "prettier", lsp_format = "never" },
+        graphql         = { "prettier", lsp_format = "never" },
 
-        -- Toolchains nativas. Binário ausente => conform marca indisponível e
-        -- o lsp_format = "fallback" abaixo manda para o LSP da linguagem.
+        -- Toolchains nativas. Aqui o fallback do LSP é desejado: binário ausente
+        -- => sourcekit/roslyn/dartls/gopls formatam, que é o mesmo resultado que
+        -- a ferramenta dedicada produziria.
         go    = { "goimports", "gofumpt" },
         dart  = { "dart_format" },
         swift = { "swiftformat" },
