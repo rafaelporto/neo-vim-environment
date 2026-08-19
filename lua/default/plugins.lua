@@ -172,8 +172,12 @@ return {
     dependencies = {
         "nvim-telescope/telescope.nvim",
         "MunifTanjim/nui.nvim",
-        "nvim-tree/nvim-tree.lua",     -- (optional) to manage project files
-        "stevearc/oil.nvim",           -- (optional) to manage project files
+        -- nvim-tree.lua e oil.nvim saíram: eram deps OPCIONAIS daqui, para o
+        -- xcodebuild sincronizar o .xcodeproj quando você cria/renomeia/apaga
+        -- arquivo pelo explorer. Mas o xcodebuild também tem
+        -- integrations/neo-tree.lua com neo_tree = { enabled = true } por
+        -- default, e o neo-tree é o explorer de verdade aqui (<leader>e) —
+        -- então o recurso continua funcionando pelo caminho em uso.
     },
     config = function()
         require("xcodebuild").setup({
