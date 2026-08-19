@@ -33,11 +33,6 @@ vim.opt.updatetime = 50
 
 -- ─── Plugins ──────────────────────────────────────────────────────────────────
 
--- conjure
-vim.g["conjure#log#botright"] = true
-vim.g["conjure#debug"] = false
-vim.g["conjure#mapping#doc_word"] = false
-
 -- markdown
 vim.g["mkdp_auto_start"] = 0
 vim.g["mkdp_refresh_slow"] = 0

@@ -11,9 +11,6 @@ return {
         lazy = false,
         enabled = true,
     },
-    "tpope/vim-dispatch",
-    "clojure-vim/vim-jack-in",
-    "radenling/vim-dispatch-neovim",
     {
         "williamboman/mason.nvim",
         build = function()
@@ -81,29 +78,6 @@ return {
         build = function()
             vim.fn["mkdp#util#install"]()
         end,
-    },
-    { "julienvincent/nvim-paredit" },
-    {
-        "Olical/conjure",
-        ft = { "clojure" }, -- languages
-        dependencies = {
-            {
-                "PaterJason/cmp-conjure",
-                config = function()
-                    local cmp = require("cmp")
-                    local config = cmp.get_config()
-                    table.insert(config.sources, {
-                        name = "buffer",
-                        option = {
-                            sources = {
-                                { name = "conjure" },
-                            },
-                        },
-                    })
-                    cmp.setup(config)
-                end,
-            },
-        },
     },
     {
         "scalameta/nvim-metals",

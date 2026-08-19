@@ -10,7 +10,6 @@ require("mason-lspconfig").setup({
 	ensure_installed = {
 		"ts_ls",
 		"eslint",
-		"clojure_lsp",
 		"lua_ls",
 		"yamlls",
 		"jsonls",
@@ -37,7 +36,6 @@ vim.diagnostic.config({
 for _, server in ipairs({
 	"ts_ls",
 	"eslint",
-	"clojure_lsp",
 	"gopls",
 	"cssls",
 	"marksman",
@@ -105,7 +103,6 @@ vim.lsp.config["lua_ls"] = {
 vim.lsp.enable({
 	"ts_ls",
 	"eslint",
-	"clojure_lsp",
 	"gopls",
 	"cssls",
 	"marksman",

@@ -13,7 +13,6 @@ null_ls.setup({
 			command = "golangci-lint",
 			args = { "run", "$FILENAME", "--out-format=json" },
 		}),
-		null_ls.builtins.diagnostics.clj_kondo,
 		null_ls.builtins.diagnostics.editorconfig_checker,
 		null_ls.builtins.formatting.prettier,
 		null_ls.builtins.formatting.stylua,
