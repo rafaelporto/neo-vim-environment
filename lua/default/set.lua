@@ -17,6 +17,12 @@ vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 
+-- ─── Folds ────────────────────────────────────────────────────────────────────
+-- after/plugin/treesitter.lua liga foldmethod=expr por buffer. Sem isto o
+-- foldlevel default (0) abriria todo arquivo com tudo dobrado.
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+
 -- ─── Search ───────────────────────────────────────────────────────────────────
 vim.opt.hlsearch = false
 vim.opt.incsearch = true

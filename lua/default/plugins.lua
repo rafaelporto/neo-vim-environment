@@ -64,6 +64,33 @@ return {
         },
     },
     { "HiPhish/rainbow-delimiters.nvim",        lazy = true },
+    {
+        "nvim-treesitter/nvim-treesitter",
+        branch = "main", -- master está congelada e não suporta nvim 0.12
+        lazy = false,    -- upstream: "this plugin does not support lazy-loading"
+        build = ":TSUpdate",
+        config = function()
+            -- setup() é opcional: install_dir default é stdpath("data")/site.
+            -- install() é assíncrono e no-op para parser já instalado.
+            -- Requer tree-sitter-cli (brew install tree-sitter-cli) e um compilador C.
+            require("nvim-treesitter").install({
+                "bash", "c", "c_sharp", "css", "dart", "diff", "dockerfile",
+                "gitcommit", "gitignore", "go", "gomod", "gosum", "gowork",
+                "html", "javascript", "jsdoc", "json", "lua", "luadoc",
+                "markdown", "markdown_inline", "query", "regex", "scala",
+                "sql", "swift", "toml", "tsx", "typescript", "vim", "vimdoc",
+                "yaml",
+            })
+        end,
+    },
+    {
+        -- opts = {} faz o lazy.nvim chamar setup({}), que é OBRIGATÓRIO: o
+        -- caminho zero-config do plugin faz require("nvim-treesitter.configs"),
+        -- módulo que não existe na branch main, e quebra.
+        "windwp/nvim-ts-autotag",
+        ft = { "html", "javascript", "javascriptreact", "typescript", "typescriptreact", "markdown" },
+        opts = {},
+    },
     { "b0o/schemastore.nvim",                   lazy = true },
     { "nvim-telescope/telescope-ui-select.nvim" },
     { "nvim-telescope/telescope-dap.nvim",      lazy = true },
