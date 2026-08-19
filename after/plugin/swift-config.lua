@@ -27,10 +27,6 @@ local on_attach = function(_, bufnr)
 
     vim.keymap.set("n", "<leader>xx", "<cmd>XcodebuildQuickfixLine<cr>", { desc = "Quickfix Line" })
     vim.keymap.set("n", "<leader>xa", "<cmd>XcodebuildCodeActions<cr>", { desc = "Show Code Actions" })
-
-    vim.keymap.set("n", "<leader>ml", function()
-        require("lint").try_lint()
-    end, { desc = "Lint file" })
 end
 
 vim.lsp.config["sourcekit"] = {
@@ -40,40 +36,3 @@ vim.lsp.config["sourcekit"] = {
 }
 
 vim.lsp.enable("sourcekit")
-
-local conform = require("conform")
-
--- Formatter config
-conform.setup({
-    formatters_by_ft = {
-        swift = { "swiftformat" },
-        dart = { "dart_format" },
-    },
-    format_on_save = function(bufnr)
-        local ignore_filetypes = { "oil" }
-        if vim.tbl_contains(ignore_filetypes, vim.bo[bufnr].filetype) then
-            return
-        end
-
-        return { timeout_ms = 500, lsp_fallback = true }
-    end,
-    log_level = vim.log.levels.ERROR,
-})
-
--- linter config
-local lint = require("lint")
-
-lint.linters_by_ft = {
-    swift = { "swiftlint" },
-}
-
-local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
-
-vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
-    group = lint_augroup,
-    callback = function()
-        if not vim.endswith(vim.fn.bufname(), "swiftinterface") then
-            require("lint").try_lint()
-        end
-    end,
-})

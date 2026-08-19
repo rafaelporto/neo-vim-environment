@@ -29,7 +29,6 @@ vim.keymap.set("n", "<C-qa>", ":qa<CR>", { desc = "Close all buffers" })
 
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable ex mode" })
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "Open tmux sessionizer" })
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format file" })
 
 -- quickfix navigation
 vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
