@@ -10,6 +10,7 @@ require("mason-lspconfig").setup({
 	ensure_installed = {
 		"ts_ls",
 		"eslint",
+		"gopls",
 		"lua_ls",
 		"yamlls",
 		"jsonls",
@@ -36,7 +37,6 @@ vim.diagnostic.config({
 for _, server in ipairs({
 	"ts_ls",
 	"eslint",
-	"gopls",
 	"cssls",
 	"marksman",
 	"dockerls",
@@ -44,6 +44,50 @@ for _, server in ipairs({
 }) do
 	vim.lsp.config[server] = { capabilities = capabilities }
 end
+
+-- ─── Go ───────────────────────────────────────────────────────────────────────
+-- Antes o gopls só recebia `capabilities` pelo loop acima, ou seja nenhum
+-- setting: sem gofumpt, staticcheck, analyses, inlay hints nem codelenses.
+vim.lsp.config["gopls"] = {
+	capabilities = capabilities,
+	settings = {
+		gopls = {
+			gofumpt = true,
+			staticcheck = true,
+			usePlaceholders = true,
+			completeUnimported = true,
+			semanticTokens = true,
+			directoryFilters = { "-.git", "-node_modules", "-vendor" },
+			analyses = {
+				unusedparams = true,
+				unusedvariable = true,
+				unusedwrite = true,
+				shadow = true,
+				nilness = true,
+				useany = true,
+			},
+			codelenses = {
+				generate = true,
+				test = true,
+				tidy = true,
+				upgrade_dependency = true,
+				vendor = true,
+				run_govulncheck = true,
+				regenerate_cgo = true,
+				gc_details = false,
+			},
+			hints = {
+				assignVariableTypes = true,
+				compositeLiteralFields = true,
+				compositeLiteralTypes = true,
+				constantValues = true,
+				functionTypeParameters = true,
+				parameterNames = true,
+				rangeVariableTypes = true,
+			},
+		},
+	},
+}
 
 vim.lsp.config["bashls"] = {
 	capabilities = capabilities,
@@ -178,6 +222,18 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		vim.keymap.set("n", "<leader>d", function()
 			vim.diagnostic.setloclist()
 		end, { buffer = bufnr, remap = false, desc = "Buffer diagnostics in loclist" })
+
+		-- Code lens: o gopls expõe generate, tidy, test e run_govulncheck aqui.
+		-- Gated por capability, então é no-op em servidores que não implementam.
+		local client = vim.lsp.get_client_by_id(ev.data.client_id)
+		if client and client:supports_method("textDocument/codeLens") then
+			vim.keymap.set("n", "<leader>lc", vim.lsp.codelens.run,
+				{ buffer = bufnr, desc = "Run code lens" })
+			vim.api.nvim_create_autocmd({ "BufEnter", "InsertLeave", "BufWritePost" }, {
+				buffer = bufnr,
+				callback = function() vim.lsp.codelens.refresh({ bufnr = bufnr }) end,
+			})
+		end
 	end,
 })
 
