@@ -34,7 +34,17 @@ return {
         "nvim-neotest/neotest",
         dependencies = {
             "nvim-lua/plenary.nvim",
+            "nvim-neotest/nvim-nio", -- dependência obrigatória do neotest
             "antoinemadec/FixCursorHold.nvim",
+            {
+                -- v2+ exige o parser Go da branch main do nvim-treesitter,
+                -- garantido pelo spec do nvim-treesitter acima.
+                "fredrikaverpil/neotest-golang",
+                version = "*", -- rastreia releases, não o main
+            },
+            "marilari88/neotest-vitest",
+            "nvim-neotest/neotest-jest",
+            "sidlatau/neotest-dart",
             "Issafalcon/neotest-dotnet",
         },
         lazy = true,
