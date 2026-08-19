@@ -276,7 +276,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		vim.keymap.set("n", "<leader>aw", function()
 			vim.diagnostic.setqflist({ severity = "W" })
 		end, { buffer = bufnr, remap = false, desc = "All workspace warnings in quickfix" })
-		vim.keymap.set("n", "<leader>d", function()
+		-- <leader>ad, não <leader>d: este mapa é buffer-local e vencia o
+		-- delete-sem-yank global de remap.lua:22, quebrando <leader>dd e
+		-- <leader>dw em TODO buffer com LSP — Go, TS, Swift, Dart, Lua.
+		-- <leader>a já é o namespace de diagnósticos (aa/ae/aw/aq).
+		vim.keymap.set("n", "<leader>ad", function()
 			vim.diagnostic.setloclist()
 		end, { buffer = bufnr, remap = false, desc = "Buffer diagnostics in loclist" })
 
