@@ -10,7 +10,7 @@ Harpoon maintains a per-project list of file marks (up to 4 slots). Marks persis
 
 | Key | Action |
 |---|---|
-| `<leader>a` | Add current file to harpoon list |
+| `<leader>A` | Add current file to harpoon list |
 | `<C-e>` | Toggle harpoon quick menu |
 | `<leader>1` | Jump to mark slot 1 |
 | `<leader>2` | Jump to mark slot 2 |
@@ -19,4 +19,4 @@ Harpoon maintains a per-project list of file marks (up to 4 slots). Marks persis
 
 > **Note:** `<C-e>` also closes the nvim-cmp completion menu (abort), but cmp is only active in insert mode while harpoon uses normal mode — no conflict.
 
-> **Note:** `<leader>a` is a complete mapping, but it is also the prefix of the `<leader>a` diagnostics maps (`aa`, `ae`, `aw`, `ad`, `aq` — see [keymaps.md](keymaps.md)). It still works, it just fires after `timeoutlen` instead of immediately.
+> **Why `<leader>A` and not `<leader>a`.** `<leader>a` is the diagnostics namespace (`aa`, `ad`, `ae`, `aq`, `aw` — see [keymaps.md](keymaps.md)), so a complete `<leader>a` mapping was also a prefix: adding a file worked, but only after `timeoutlen` had elapsed, on an action you perform constantly. The capital follows the `<leader>F` (Flutter) and `<leader>X` (xcodebuild) convention. Only the add key moved — `<C-e>` and `<leader>1`–`<leader>4` are unchanged.

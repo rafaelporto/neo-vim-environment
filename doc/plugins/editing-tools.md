@@ -81,9 +81,11 @@ nvim 0.12 ships the treesitter **API** (`vim.treesitter.start()`, `vim.treesitte
 
 ### Installed parsers
 
-32 parsers are installed into `stdpath("data")/site/parser` (the 7 nvim ships are in the list as well, so the site copy wins):
+31 parsers are installed into `stdpath("data")/site/parser` (the 7 nvim ships are in the list as well, so the site copy wins):
 
-`bash`, `c`, `c_sharp`, `css`, `dart`, `diff`, `dockerfile`, `gitcommit`, `gitignore`, `go`, `gomod`, `gosum`, `gowork`, `html`, `javascript`, `jsdoc`, `json`, `lua`, `luadoc`, `markdown`, `markdown_inline`, `query`, `regex`, `scala`, `sql`, `swift`, `toml`, `tsx`, `typescript`, `vim`, `vimdoc`, `yaml`.
+`bash`, `c`, `c_sharp`, `css`, `dart`, `diff`, `dockerfile`, `gitcommit`, `gitignore`, `go`, `gomod`, `gosum`, `gowork`, `html`, `javascript`, `jsdoc`, `json`, `lua`, `luadoc`, `markdown`, `markdown_inline`, `query`, `regex`, `sql`, `swift`, `toml`, `tsx`, `typescript`, `vim`, `vimdoc`, `yaml`.
+
+> `scala` was dropped with Scala support — a parser compiled on every fresh install for a language nothing else in this config targeted.
 
 ### Host prerequisites
 

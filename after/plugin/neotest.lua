@@ -90,7 +90,13 @@ map("<leader>ta", function() neotest().run.run({ suite = true }) end, "Test: rod
 -- <leader>tD e não <leader>td: o todo-comment.lua já usa <leader>td para
 -- :TodoTelescope e carrega DEPOIS deste arquivo na ordem alfabética, então o
 -- td daqui nunca disparava. Casa com o <leader>tS (parar), também maiúsculo.
-map("<leader>tD", function() neotest().run.run({ strategy = "dap" }) end, "Test: debug mais próximo")
+map("<leader>tD", function()
+    -- ensure() antes: o neotest carrega o nvim-dap por conta própria, mas os
+    -- listeners que abrem a dapui vivem em lua/default/dap.lua. Sem isto o
+    -- debug rodaria sem UI.
+    require("default.dap").ensure()
+    neotest().run.run({ strategy = "dap" })
+end, "Test: debug mais próximo")
 map("<leader>tl", function() neotest().run.run_last() end, "Test: repetir último")
 map("<leader>tS", function() neotest().run.stop() end, "Test: parar")
 map("<leader>ts", function() neotest().summary.toggle() end, "Test: summary")

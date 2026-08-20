@@ -119,8 +119,8 @@ Prompts are wrapped in functions, so they fire on `F5` rather than at startup.
 | `F11` | Step into |
 | `Shift+F11` | Step out |
 | `Shift+F5` | Stop session |
-| `<leader>du` | Toggle DAP UI |
-| `<leader>duc` | Close DAP UI |
+| `<leader>Du` | Toggle DAP UI |
+| `<leader>Dc` | Close DAP UI |
 
 ## Testing
 

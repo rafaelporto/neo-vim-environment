@@ -1,6 +1,6 @@
 # neo-vim-environment
 
-Personal Neovim configuration for **nvim 0.12+**. Uses `lazy.nvim` for plugin management and the native LSP API (`vim.lsp.config` / `vim.lsp.enable`). Primary language is Go; also supports Swift/iOS, Dart/Flutter, TypeScript/JS, Scala, C# and more.
+Personal Neovim configuration for **nvim 0.12+**. Uses `lazy.nvim` for plugin management and the native LSP API (`vim.lsp.config` / `vim.lsp.enable`). Primary language is Go; also supports Swift/iOS, Dart/Flutter, TypeScript/JS, C# and more.
 
 ## Requirements
 
@@ -46,6 +46,7 @@ npm i -D prettier                             # per project, never global
 | [nvim-lualine/lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) | Statusline with LSP clients, branch, diagnostics |
 | [folke/noice.nvim](https://github.com/folke/noice.nvim) | Command palette, LSP doc borders, notification routing |
 | [rcarriga/nvim-notify](https://github.com/rcarriga/nvim-notify) | Notification backend for noice |
+| [folke/which-key.nvim](https://github.com/folke/which-key.nvim) | Popup showing what can follow a key prefix |
 | [nvim-neo-tree/neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim) | File explorer (`<leader>e`) |
 | [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) | Fuzzy finder — files, grep, LSP, git, DAP |
 | [nvim-telescope/telescope-ui-select.nvim](https://github.com/nvim-telescope/telescope-ui-select.nvim) | Dropdown picker for code actions and selects |
@@ -81,7 +82,7 @@ npm i -D prettier                             # per project, never global
 | [theHamsta/nvim-dap-virtual-text](https://github.com/theHamsta/nvim-dap-virtual-text) | Inline variable values during debug |
 | [nvim-telescope/telescope-dap.nvim](https://github.com/nvim-telescope/telescope-dap.nvim) | Telescope integration for DAP |
 
-Adapters live one-per-language: `after/plugin/dap-go.lua` (delve), `after/plugin/dap-js.lua` (js-debug-adapter), `after/plugin/dap-dotnet.lua` (netcoredbg), `after/plugin/dap-swift.lua` (xcodebuild). See [doc/plugins/dap-core.md](doc/plugins/dap-core.md).
+Adapters live one-per-language: `after/plugin/dap-go.lua` (delve), `after/plugin/dap-js.lua` (js-debug-adapter), `after/plugin/dap-dotnet.lua` (netcoredbg), `after/plugin/dap-swift.lua` (xcodebuild). None of the DAP stack loads at startup — `lua/default/dap.lua` initialises it on the first `F5`/`F9`. See [doc/plugins/dap-core.md](doc/plugins/dap-core.md).
 
 ### Testing
 
@@ -119,14 +120,13 @@ See [doc/plugins/neotest.md](doc/plugins/neotest.md).
 
 | Plugin | Purpose |
 |---|---|
-| [scalameta/nvim-metals](https://github.com/scalameta/nvim-metals) | Scala LSP + DAP via Metals |
 | [seblj/roslyn.nvim](https://github.com/seblj/roslyn.nvim) | C# LSP via Roslyn |
 | [wojciech-kulik/xcodebuild.nvim](https://github.com/wojciech-kulik/xcodebuild.nvim) | Xcode build/test/run/coverage integration |
 | [akinsho/flutter-tools.nvim](https://github.com/akinsho/flutter-tools.nvim) | Dart/Flutter LSP, hot reload, DAP |
 
 ## Keymaps
 
-Leader is `<space>`. Namespaces: `<leader>a` Harpoon + diagnostics · `<leader>c` code actions · `<leader>e` file tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (Swift buffers only).
+Leader is `<space>`, and [which-key](https://github.com/folke/which-key.nvim) shows the available continuations after any prefix. Namespaces: `<leader>a` diagnostics · `<leader>A` Harpoon add · `<leader>c` code actions · `<leader>d` delete without yank · `<leader>D` DAP UI · `<leader>e` file tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (Swift buffers only).
 
 Full list in [doc/plugins/keymaps.md](doc/plugins/keymaps.md).
 
@@ -134,5 +134,5 @@ Full list in [doc/plugins/keymaps.md](doc/plugins/keymaps.md).
 
 See [doc/](doc/) for per-plugin configuration guides and per-language setup + debug workflows.
 
-- Languages: [go](doc/languages/go.md) · [typescript](doc/languages/typescript.md) · [dart-flutter](doc/languages/dart-flutter.md) · [swift](doc/languages/swift.md) · [csharp](doc/languages/csharp.md) · [scala](doc/languages/scala.md) · [lua](doc/languages/lua.md) · [json-yaml](doc/languages/json-yaml.md)
+- Languages: [go](doc/languages/go.md) · [typescript](doc/languages/typescript.md) · [dart-flutter](doc/languages/dart-flutter.md) · [swift](doc/languages/swift.md) · [csharp](doc/languages/csharp.md) · [lua](doc/languages/lua.md) · [json-yaml](doc/languages/json-yaml.md)
 - Cross-cutting: [lsp-core](doc/plugins/lsp-core.md) · [formatting](doc/plugins/formatting.md) · [neotest](doc/plugins/neotest.md) · [dap-core](doc/plugins/dap-core.md) · [editing-tools](doc/plugins/editing-tools.md)

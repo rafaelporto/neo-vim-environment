@@ -28,7 +28,9 @@ telescope.setup {
 }
 
 telescope.load_extension('ui-select')
-telescope.load_extension('dap')
+-- A extensão 'dap' NÃO é carregada aqui: ela puxa o telescope-dap, que faz
+-- require("dap") e trazia a pilha de debug inteira para todo startup.
+-- Passou a ser carregada em lua/default/dap.lua, junto do resto do DAP.
 telescope.load_extension('noice')
 
 vim.keymap.set('n', '<leader>stl', builtin.treesitter, { desc = 'Lists Function names, variables, from Treesitter' })

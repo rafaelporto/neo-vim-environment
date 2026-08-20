@@ -102,8 +102,8 @@ The debug adapter is `flutter debug_adapter`, bundled with the Flutter SDK — n
 | `F11` | Step into |
 | `Shift+F11` | Step out |
 | `Shift+F5` | Stop session |
-| `<leader>du` | Toggle DAP UI |
-| `<leader>duc` | Close DAP UI |
+| `<leader>Du` | Toggle DAP UI |
+| `<leader>Dc` | Close DAP UI |
 
 ## Testing
 

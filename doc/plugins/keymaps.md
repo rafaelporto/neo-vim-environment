@@ -9,9 +9,11 @@ Defined in `lua/default/remap.lua`. Active in all buffers regardless of filetype
 
 | Prefix | Owner |
 |---|---|
-| `<leader>a` | Diagnostics lists (`lsp.lua`, `trouble.lua`) — also harpoon's bare `<leader>a` |
+| `<leader>a` | Diagnostics lists (`lsp.lua`, `trouble.lua`) |
+| `<leader>A` | Harpoon add file — a complete mapping, not a prefix |
 | `<leader>c` | Code actions and `chmod +x` |
-| `<leader>d` | Delete without yank (`remap.lua`) — and DAP UI (`du`, `duc`) |
+| `<leader>d` | Delete without yank (`remap.lua`) — an **operator**, nothing else may live under it |
+| `<leader>D` | DAP UI (`Du`, `Dc`) |
 | `<leader>e` | File tree (neo-tree) |
 | `<leader>f` | Format (conform) |
 | `<leader>F` | Flutter (Dart buffers only) |
@@ -23,7 +25,9 @@ Defined in `lua/default/remap.lua`. Active in all buffers regardless of filetype
 | `<leader>s` | Telescope search |
 | `<leader>t` | Tests (neotest) |
 | `<leader>v` | LSP symbols and config quick-open |
-| `<leader>x` | Xcodebuild — **buffer-local to Swift buffers** |
+| `<leader>x` | Xcodebuild — **buffer-local to Swift/ObjC buffers**, where the plugin is the only place it loads |
+
+> Every prefix above is registered as a which-key group, so pressing one shows its continuations with their descriptions. `timeoutlen` was left at its default on purpose — see [which-key.md](which-key.md).
 
 ## Navigation & Scrolling
 
@@ -115,7 +119,7 @@ Set in `after/plugin/lsp.lua` on `LspAttach`, both gated on client capability. F
 | `<leader>ad` | `lsp.lua` | Buffer diagnostics → loclist |
 | `<leader>aq` | `trouble.lua` | `Trouble quickfix toggle` |
 
-> **Conflict note:** harpoon binds a bare `<leader>a` (add file). It still works, but because the five maps above use it as a prefix, it only fires after `timeoutlen`.
+> Harpoon's add-file used to be a bare `<leader>a` here. Because the five maps above use it as a prefix, it only fired after `timeoutlen`; it moved to `<leader>A` — see [harpoon.md](harpoon.md).
 
 ## Recent moves and why
 
@@ -126,3 +130,7 @@ Set in `after/plugin/lsp.lua` on `LspAttach`, both gated on client capability. F
 | `<leader>xq` (`TroubleToggle quickfix`) | `<leader>aq` (`Trouble quickfix toggle`) | v2 command syntax against the installed v3, and it overwrote xcodebuild's working `<leader>xq`. See [trouble.md](trouble.md) |
 | `<leader>f` → `vim.lsp.buf.format` | `<leader>f` → `conform.format` | Formatting has a single owner now. The mapping moved out of `remap.lua` into `after/plugin/formatting.lua`, and it works in visual mode too. See [formatting.md](formatting.md) |
 | 19 xcodebuild maps, global | 19 xcodebuild maps, buffer-local | They were global by accident — `swift-config.lua` built an `opts` table with `buffer = bufnr` and never passed it, so a single sourcekit attach defined them everywhere |
+| `<leader>du` / `<leader>duc` (DAP UI) | `<leader>Du` / `<leader>Dc` | `<leader>d` is the delete-without-yank **operator**. While a `<leader>du` existed, every `<leader>dw` / `<leader>dip` / `<leader>d}` paid `timeoutlen` waiting to see whether a `u` followed. The capital follows `<leader>F` (Flutter) and `<leader>X` (xcodebuild). See [dap-core.md](dap-core.md) |
+| `<leader>a` (harpoon add file) | `<leader>A` | `<leader>a` is the diagnostics namespace (`aa` / `ad` / `ae` / `aq` / `aw`), so a complete `<leader>a` paid `timeoutlen` on every add — on one of the most frequent actions there is. `<C-e>` and `<leader>1`–`<leader>4` are unchanged. See [harpoon.md](harpoon.md) |
+
+> The pattern in the last two rows is the same one: a **complete** mapping that is also the **prefix** of others costs `timeoutlen` every single time. Moving it to a capital is cheaper than lowering `timeoutlen` globally, and which-key removes the reason people lower it in the first place.

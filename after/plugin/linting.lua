@@ -15,17 +15,47 @@ lint.linters_by_ft = {
     -- vivo e somar os dois duplicaria cada warning.
 }
 
+-- Só roda linter cujo binário existe. Sem isto, um swiftlint ausente faz TODO
+-- buffer swift abrir com
+--   "Error in BufReadPost Autocommands: Error running swiftlint: ENOENT"
+-- porque o nvim-lint não checa disponibilidade antes de spawnar.
+--
+-- Usa o opts.filter do próprio nvim-lint, que já entrega o linter resolvido —
+-- lint.linters[name] pode ser tabela OU função que devolve a tabela, e o .cmd
+-- também pode ser função.
+local function is_available(linter)
+    local cmd = linter.cmd
+    if type(cmd) == "function" then
+        local ok, resolved = pcall(cmd)
+        if not ok then
+            return false
+        end
+        cmd = resolved
+    end
+    return type(cmd) == "string" and vim.fn.executable(cmd) == 1
+end
+
+local function run_lint()
+    lint.try_lint(nil, { filter = is_available })
+end
+
 local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
 
 vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
     group = lint_augroup,
     callback = function()
-        if not vim.endswith(vim.fn.bufname(), "swiftinterface") then
-            lint.try_lint()
+        if vim.endswith(vim.fn.bufname(), "swiftinterface") then
+            return
         end
+        run_lint()
     end,
 })
 
 vim.keymap.set("n", "<leader>ml", function()
-    lint.try_lint()
+    local names = lint.linters_by_ft[vim.bo.filetype]
+    if not names or #names == 0 then
+        vim.notify("Nenhum linter configurado para " .. vim.bo.filetype, vim.log.levels.WARN)
+        return
+    end
+    run_lint()
 end, { desc = "Lint file" })

@@ -1,5 +1,18 @@
+-- setup() por tema, executado só quando aquele tema é de fato escolhido.
+-- Antes, github-theme e catppuccin rodavam setup() no startup mesmo sem nunca
+-- serem selecionados (ColorMyPencils só recebe dracula ou tokyonight-day).
+local theme_setup = {
+    ["github_dark"] = function() require("github-theme").setup({ options = { transparent = true } }) end,
+    ["github_light"] = function() require("github-theme").setup({ options = { transparent = true } }) end,
+    ["catppuccin"] = function() require("catppuccin").setup({ transparent_background = true }) end,
+}
+
 function ColorMyPencils(color)
     color = color or "dracula"
+    local setup = theme_setup[color]
+    if setup then
+        setup()
+    end
     vim.cmd.colorscheme(color)
 end
 
@@ -82,16 +95,6 @@ require("lualine").setup({
         lualine_z = {},
     },
     extensions = {},
-})
-
-require("github-theme").setup({
-    options = {
-        transparent = true,
-    },
-})
-
-require("catppuccin").setup({
-    transparent_background = true,
 })
 
 local time = os.date("*t")

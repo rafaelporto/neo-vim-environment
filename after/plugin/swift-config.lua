@@ -42,10 +42,19 @@ local on_attach = function(_, bufnr)
     map("n", "<leader>xa", "<cmd>XcodebuildCodeActions<cr>", "Show Code Actions")
 end
 
+-- Sem `cmd` aqui de propósito. Antes havia
+--   cmd = { vim.trim(vim.fn.system("xcrun -f sourcekit-lsp")) }
+-- que nascia um subprocesso xcrun em TODA sessão, inclusive Go/TS, só para
+-- resolver um caminho: 17ms de 17,3ms do custo deste arquivo.
+--
+-- O nvim-lspconfig já traz lsp/sourcekit.lua com cmd = { "sourcekit-lsp" },
+-- os filetypes certos, um root_dir que entende buildServer.json / .bsp /
+-- *.xcodeproj / *.xcworkspace / Package.swift, e capabilities extras. E o
+-- shim /usr/bin/sourcekit-lsp respeita o xcode-select, então resolver na hora
+-- de subir o LSP é mais correto que congelar o caminho no startup do nvim.
 vim.lsp.config["sourcekit"] = {
     capabilities = require("cmp_nvim_lsp").default_capabilities(),
     on_attach = on_attach,
-    cmd = { vim.trim(vim.fn.system("xcrun -f sourcekit-lsp")) },
 }
 
 vim.lsp.enable("sourcekit")

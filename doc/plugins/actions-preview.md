@@ -12,4 +12,4 @@ Replaces the default `vim.lsp.buf.code_action()` picker with a richer preview UI
 |---|---|---|
 | `<leader>ca` | n / v | Open code actions with preview |
 
-> **Conflict note:** `nvim-metals.lua` also sets `<leader>ca` buffer-locally in its `on_attach`. The metals binding (plain `vim.lsp.buf.code_action()`) wins in Scala buffers. In all other languages, actions-preview is used.
+> **Sole owner of `<leader>ca`.** `nvim-metals.lua` used to set the same key buffer-locally in its `on_attach`, so Scala buffers got the plain `vim.lsp.buf.code_action()` picker instead. Scala support has been removed, so actions-preview now answers `<leader>ca` in every language.

@@ -59,8 +59,8 @@ Uses `netcoredbg`. Install once with `:MasonInstall netcoredbg`.
 | `F11` | Step into |
 | `Shift+F11` | Step out |
 | `Shift+F5` | Stop |
-| `<leader>du` | Toggle DAP UI |
-| `<leader>duc` | Close DAP UI |
+| `<leader>Du` | Toggle DAP UI |
+| `<leader>Dc` | Close DAP UI |
 
 ## Testing
 

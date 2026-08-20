@@ -21,7 +21,7 @@ vim.lsp.config("*", { capabilities = capabilities })
 
 This is **merge layer 1**, so it applies to every server resolved through `vim.lsp.config` / `vim.lsp.enable` — including servers configured in *other* files, such as `sourcekit` (`swift-config.lua`) and `roslyn` (`roslyn.lua`). It replaces a per-server loop that had to be kept in sync by hand with the `vim.lsp.enable` list below.
 
-> **Two servers bypass it:** `dartls` is started by flutter-tools with a direct `vim.lsp.start()` call, and `nvim-metals` builds its own config table. Both set `capabilities` themselves — flutter-tools in the `lsp = { capabilities = ... }` block in `lua/default/plugins.lua`, metals in `after/plugin/nvim-metals.lua`.
+> **One server bypasses it:** `dartls` is started by flutter-tools with a direct `vim.lsp.start()` call, so it sets `capabilities` itself — in the `lsp = { capabilities = ... }` block of the flutter-tools spec in `lua/default/plugins.lua`. `nvim-metals` used to be the second exception; Scala support has been removed.
 
 ## Mason
 
@@ -35,7 +35,9 @@ automatic_enable = { exclude = { "ts_ls" } }
 
 > **Why `ts_ls` is excluded:** `mason-lspconfig` auto-enables *every* installed server. `ts_ls` must never run alongside `vtsls` — duplicated diagnostics and double the memory. The exclusion is a guard in case the package gets reinstalled.
 
-Servers not managed by Mason are configured the same way but must be reachable on their own: `sourcekit` (via `xcrun`, needs Xcode), `dartls` (Flutter SDK, via flutter-tools), `metals` (nvim-metals), `roslyn` (manual `:MasonInstall roslyn`).
+Servers not managed by Mason are configured the same way but must be reachable on their own: `sourcekit` (`sourcekit-lsp` on `PATH`, needs Xcode — see [swift.md](../languages/swift.md)), `dartls` (Flutter SDK, via flutter-tools), `roslyn` (manual `:MasonInstall roslyn`).
+
+> **Known and deliberate:** `after/plugin/roslyn.lua` calls `require("roslyn").setup()` at file level, which defeats the `ft = { "cs" }` gate on the plugin's own spec — the plugin loads in every session. It measures ~1.2 ms in total, and neither `roslyn` nor `dotnet` is installed on this machine, so the fix could not be tested. Left alone on purpose; moving the `require` into a `FileType` autocmd (the way `after/plugin/dap-swift.lua` does it) is the obvious change once there is a C# project to verify against.
 
 ## Enabled servers
 

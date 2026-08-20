@@ -30,7 +30,7 @@ After plugins load, Neovim's `after/plugin/` directory is sourced automatically.
 
 `vim.lsp.config("*", { capabilities = capabilities })` in `after/plugin/lsp.lua` is merge layer 1 and applies to every server that goes **through** `vim.lsp.config` — including `sourcekit` and `roslyn`, which are configured in other files. Do not reintroduce a per-server capabilities loop; it has to be kept in lockstep with `vim.lsp.enable` and drifts.
 
-> Two servers bypass the wildcard: `dartls` (flutter-tools calls `vim.lsp.start` directly) and Metals (nvim-metals builds its own config). Both set `capabilities` themselves — flutter-tools in the `lsp = {…}` block in `plugins.lua`, Metals in `nvim-metals.lua`. If you change the shared capabilities, update those two too.
+> One server bypasses the wildcard: `dartls`, which flutter-tools starts with a direct `vim.lsp.start` call rather than through `vim.lsp.config`. It sets `capabilities` itself, in the `lsp = {…}` block in `plugins.lua` — so a change to the shared capabilities has to be mirrored there.
 
 **Mason** manages LSP server installation. Servers are listed in `mason-lspconfig` ensure list in `after/plugin/lsp.lua`. Note `automatic_enable` there: mason-lspconfig enables every *installed* server, so `ts_ls` is explicitly excluded — it must never run alongside `vtsls`.
 
@@ -63,7 +63,6 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
 | Swift/iOS | sourcekit-lsp | xcodebuild.nvim, conform (swiftformat), nvim-lint (swiftlint) |
 | Dart/Flutter | dartls (via flutter-tools.nvim) | flutter-tools.nvim (hot reload, devices, emulators, outline), conform (dart_format), Dart DAP (bundled with SDK), neotest-dart |
 | TypeScript/JS | vtsls + eslint | conform (prettier/biome from `node_modules`), js-debug-adapter (`after/plugin/dap-js.lua`), nvim-ts-autotag, neotest-vitest/jest |
-| Scala | nvim-metals | separate setup in `after/plugin/nvim-metals.lua` |
 | C# | roslyn (seblj/roslyn.nvim) — **requires manual server install** | conform (csharpier, falls back to Roslyn), netcoredbg (DAP), neotest-dotnet |
 | Lua | lua_ls | workspace configured for nvim API, conform (stylua) |
 | JSON/YAML | jsonls + yamlls | schemastore.nvim for schema validation |
@@ -92,11 +91,13 @@ A missing formatter is not an error: conform marks it unavailable and either fal
 
 ### Namespaces
 
-`<leader>a` Harpoon add + diagnostics (`aa`/`ae`/`aw`/`ad`/`aq`) · `<leader>c` code actions + chmod · `<leader>d` delete-without-yank · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (buffer-local to Swift)
+`<leader>a` diagnostics (`aa`/`ad`/`ae`/`aq`/`aw`) · `<leader>A` Harpoon add · `<leader>c` code actions + chmod · `<leader>d` delete-without-yank · `<leader>D` DAP UI · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (buffer-local to Swift)
 
 Before adding a keymap, grep for the key. `<leader>d` and `<leader>x` each had two owners at once, and in both cases the collision silently broke the older binding — `<leader>dd` was dead in every LSP buffer, and `<leader>xq` resolved to a command that does not exist.
 
-**Known rough edge:** these keys are both a complete mapping *and* a prefix, so each pays `timeoutlen` while Neovim waits to see whether a longer sequence follows: `<leader>a` (Harpoon add, competing with the five `<leader>a?` diagnostics maps), `<leader>d` (vs `<leader>du`), `<leader>s` (vs `<leader>sB`), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`, `<leader>du`. All pre-existing; listed so a future keymap is not added to an already-crowded prefix without noticing.
+**which-key.nvim shows the continuations** after a prefix, which is why `timeoutlen` is deliberately left at its default of 1000 — the problem was never the wait, it was not remembering the key. Do not lower it as an "optimization": a short window makes deliberately-typed sequences fail, and this config has 79 `<leader>` mappings.
+
+**Still a rough edge:** a key that is both a complete mapping *and* a prefix pays `timeoutlen` before firing. The frequent offenders were fixed (Harpoon add → `<leader>A`, DAP UI → `<leader>D*`), but these remain, all pre-existing: `n` (vs `ntd`), `p` (vs `ptd`), `<leader>s` (vs 21 telescope maps), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`. Listed so a future keymap is not added to an already-crowded prefix without noticing.
 
 ### Tests (`<leader>t`, all languages via neotest)
 
@@ -141,6 +142,52 @@ If no SDK is found, `setup()` is skipped and the plugin's own "Flutter executabl
 **Debugging Flutter:** standard DAP keymaps — `F5` (continue/start), `F9` (toggle breakpoint), `F10` (step over), `F11` (step into), `<S-F11>` (step out), `<S-F5>` (stop). The debug adapter is bundled with the Flutter SDK. `debugger.enabled = true` alone routes `FlutterRun` through DAP; **`run_via_dap` no longer exists in flutter-tools** — do not add it back.
 
 Two settings are deliberately absent from the Dart LSP config: `analysisExcludedFolders` (the plugin default already excludes `<sdk>/packages` and `<sdk>/.pub-cache`, and settings merge with `tbl_deep_extend("force")`, so declaring the key would delete both — use `analysis_options.yaml` instead), and `completeFunctionCalls`/`showTodos`/`updateImportsOnRename` (already plugin defaults).
+
+## What must not load at startup
+
+The rule: a language's tooling loads only for files that use it. Verified by
+`package.loaded` being empty for all of these on a bare `nvim`:
+
+| Thing | How it stays out |
+|---|---|
+| nvim-dap, nvim-dap-ui, nvim-dap-virtual-text, nvim-nio | `lua/default/dap.lua` — a registry plus `ensure()`, triggered by the F-keys, `<leader>D*` or neotest's `<leader>tD` |
+| xcodebuild.nvim | `ft = { "swift", "objc", "objcpp" }` on the spec; `dap-swift.lua` defers its setup into a `once` FileType autocmd |
+| neotest and its five adapters | memoised helper in `after/plugin/neotest.lua`, triggered by the `<leader>t` maps |
+| flutter-tools.nvim | `ft = { "dart" }`, config inline in the spec |
+| which-key.nvim | `event = "VeryLazy"` |
+| github-theme, catppuccin | `setup()` runs from a table keyed by colorscheme, only when selected |
+
+**`lua/default/dap.lua` exists because deferring one file achieved nothing.** All
+four DAP files used to `require("dap")` at the top, so any one of them dragged in
+the whole stack. Language files now call `register(function(dap) ... end)` and the
+body runs at first use. Two non-obvious members of that stack: `telescope.lua`
+must **not** `load_extension("dap")` (it pulls telescope-dap and with it nvim-dap
+into every startup — the extension loads inside `ensure()` instead), and
+neotest's debug map has to call `ensure()` itself, or the session runs with no UI
+because the dapui listeners were never registered.
+
+**Never spawn a subprocess at startup.** `swift-config.lua` used to resolve
+sourcekit with `vim.fn.system("xcrun -f sourcekit-lsp")`, costing 16.97 ms of its
+17.3 ms in every session including Go ones. nvim-lspconfig already ships the
+`cmd`, filetypes, `root_dir` and capabilities — deleting the line took the file to
+0.29 ms and made it more correct, since the toolchain is now resolved when the
+LSP starts rather than frozen at nvim startup.
+
+Measured effect: `after/plugin/` self-time went from 55.9 ms to 27.1 ms, the
+remainder being `lsp.lua` (mason) and `colors.lua` (lualine). End-to-end startup,
+from an interleaved A/B of 10 stash/pop pairs, went from a median of 187.8 ms to
+133.5 ms — distributions that do not overlap (slowest "after" run, 135.6 ms, still
+beat the fastest "before" run, 169.2 ms).
+
+If you re-measure, interleave the two states in one loop. Sequential
+before-then-after comparisons on this machine drift with the page cache badly
+enough to hide a 50 ms change, and per-file `--startuptime` self-times are the
+stable signal.
+
+**Known exception, left on purpose:** `after/plugin/roslyn.lua` requires
+roslyn.nvim at startup and so defeats its own `ft = { "cs" }`. It measures ~1.2 ms
+and neither `roslyn` nor `dotnet` is installed here, so the fix could not be
+tested. Not worth an untestable change.
 
 ## Formatting and linting
 

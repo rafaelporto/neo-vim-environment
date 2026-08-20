@@ -28,6 +28,8 @@ The binary does not ship with the plugin. Without this guard null-ls registers t
 brew install editorconfig-checker
 ```
 
+> The same class of bug bit nvim-lint, which does not check availability before spawning either. `after/plugin/linting.lua` now passes an `opts.filter` to `lint.try_lint` that skips any linter whose `cmd` is not executable — see [swift.md](../languages/swift.md#linting).
+
 ## should_attach guard
 
 None-ls skips attaching to:

@@ -83,6 +83,8 @@ The `<leader>t` namespace, all in normal mode:
 | `]n` | Jump to next failed test |
 | `[n` | Jump to previous failed test |
 
+> **`<leader>tD` calls `require("default.dap").ensure()` first.** neotest brings up nvim-dap on its own for `strategy = "dap"`, but the listeners that open and close the dapui live in `lua/default/dap.lua` — without that call the test would be debugged with no UI at all. See [dap-core.md](dap-core.md).
+
 > **Why `<leader>tD` and not `<leader>td`.** `after/plugin/todo-comment.lua` owns `<leader>td` (`:TodoTelescope`) and is sourced after `neotest.lua` alphabetically, so a `td` here would never fire. The debug map uses the capital, matching `<leader>tS` for stop.
 
 > Three keys in this namespace differ only by case: `<leader>ts` (summary), `<leader>tS` (stop) and `<leader>tD` (debug nearest). Intentional, but worth knowing before reaching for one in a hurry.

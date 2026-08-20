@@ -51,7 +51,6 @@ return {
     },
     { "aznhe21/actions-preview.nvim", lazy = true },
     { "tpope/vim-surround",           lazy = false },
-    { "Tastyep/structlog.nvim",       lazy = true },
     { "RRethy/vim-illuminate",        lazy = false },
     { "mfussenegger/nvim-dap",        lazy = true },
     {
@@ -87,7 +86,7 @@ return {
                 "bash", "c", "c_sharp", "css", "dart", "diff", "dockerfile",
                 "gitcommit", "gitignore", "go", "gomod", "gosum", "gowork",
                 "html", "javascript", "jsdoc", "json", "lua", "luadoc",
-                "markdown", "markdown_inline", "query", "regex", "scala",
+                "markdown", "markdown_inline", "query", "regex",
                 "sql", "swift", "toml", "tsx", "typescript", "vim", "vimdoc",
                 "yaml",
             })
@@ -117,13 +116,6 @@ return {
         end,
     },
     {
-        "scalameta/nvim-metals",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "mfussenegger/nvim-dap",
-        },
-    },
-    {
         "nvim-lualine/lualine.nvim",
         dependencies = { "nvim-tree/nvim-web-devicons" },
     },
@@ -131,6 +123,36 @@ return {
         "nvimtools/none-ls.nvim",
         lazy = true,
         dependencies = { "nvim-lua/plenary.nvim" },
+    },
+    {
+        -- Popup com as continuações possíveis depois de um prefixo. Com 79
+        -- mapeamentos de <leader>, 19 do xcodebuild e 21 do telescope, ele
+        -- substitui a memorização — e é a razão pela qual NÃO baixamos o
+        -- timeoutlen: o problema era não lembrar a tecla, não o tempo de espera.
+        "folke/which-key.nvim",
+        event = "VeryLazy",
+        opts = {
+            preset = "helix",
+            delay = function(ctx)
+                -- 0 quando você já está no meio de uma sequência (o popup
+                -- aparece na hora), timeoutlen normal no primeiro toque.
+                return ctx.plugin and 0 or 200
+            end,
+            spec = {
+                { "<leader>a", group = "diagnostics / harpoon" },
+                { "<leader>c", group = "code" },
+                { "<leader>D", group = "debug UI" },
+                { "<leader>F", group = "flutter" },
+                { "<leader>g", group = "git / goto" },
+                { "<leader>l", group = "lsp toggles" },
+                { "<leader>m", group = "lint" },
+                { "<leader>n", group = "noice" },
+                { "<leader>s", group = "search (telescope)" },
+                { "<leader>t", group = "test" },
+                { "<leader>v", group = "view / edit config" },
+                { "<leader>x", group = "xcodebuild", mode = { "n", "v" } },
+            },
+        },
     },
     {
         "folke/noice.nvim",
@@ -169,6 +191,11 @@ return {
         dependencies = { "nvim-lua/plenary.nvim" },
     },
 { "wojciech-kulik/xcodebuild.nvim",
+    -- ft de propósito: o spec era eager e arrastava telescope + nui e rodava
+    -- setup() em toda sessão. Os 19 keymaps já são buffer-local aos buffers do
+    -- sourcekit, então limitar os comandos :Xcodebuild* a buffers Swift/ObjC é
+    -- coerente com como eles já eram alcançáveis.
+    ft = { "swift", "objc", "objcpp" },
     dependencies = {
         "nvim-telescope/telescope.nvim",
         "MunifTanjim/nui.nvim",

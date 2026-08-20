@@ -2,11 +2,18 @@
 
 Configuration in `after/plugin/telescope.lua`.
 
-## Extensions loaded
+## Extensions
+
+Loaded in `telescope.lua`, at startup:
 
 - `ui-select` — dropdown theme for pickers (code actions, etc.)
-- `dap` — telescope-dap integration
 - `noice` — search noice message history
+
+Loaded on demand:
+
+- `dap` — telescope-dap integration, loaded from `lua/default/dap.lua` when the DAP stack initialises
+
+> **`load_extension("dap")` is not called here on purpose.** The extension pulls in telescope-dap, which does `require("dap")` at load — one line in a file that runs at startup was enough to bring nvim-dap, nvim-dap-ui, nvim-dap-virtual-text and nvim-nio into *every* session. It now loads inside `require("default.dap").ensure()`, so `:Telescope dap commands` / `configurations` / `list_breakpoints` / `variables` / `frames` become available once a debug session has been started — which is the only moment they are useful. See [dap-core.md](dap-core.md).
 
 ## Trouble integration
 
@@ -55,7 +62,7 @@ Configuration in `after/plugin/telescope.lua`.
 | `<leader>sd` | Diagnostics |
 | `<leader>stl` | Treesitter symbols |
 
-> `<leader>stl` needs a treesitter parser for the buffer's language. With only the 7 parsers nvim ships it worked almost nowhere; the parsers installed by `nvim-treesitter` (see [editing-tools.md](editing-tools.md)) cover 32 languages now.
+> `<leader>stl` needs a treesitter parser for the buffer's language. With only the 7 parsers nvim ships it worked almost nowhere; the parsers installed by `nvim-treesitter` (see [editing-tools.md](editing-tools.md)) cover 31 languages now.
 
 ### Git
 
