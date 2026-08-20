@@ -93,6 +93,10 @@ Configured in `after/plugin/dap-js.lua`. Install the adapter once:
 
 If the binary is absent the file returns early and stays silent instead of warning on every startup. Adapter names follow vscode-js-debug: `pwa-node` and `pwa-chrome`, both launched as servers on `${port}`.
 
+> The whole DAP stack is lazy: nothing debug-related loads until the first `F5` / `F9` / `<leader>Du` (or `<leader>tD` from neotest). The adapter and configurations below are *registered* through `require("default.dap").register(...)` and the body only runs when the stack initialises. See [dap-core.md](../plugins/dap-core.md).
+
+> The executable check is the one thing that still runs at file level — it decides whether to register at all, and it is a `vim.fn.executable` call on a known path.
+
 ### DAP Configurations
 
 Registered for `javascript`, `typescript`, `javascriptreact` and `typescriptreact`:

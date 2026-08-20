@@ -305,7 +305,15 @@ return {
                     local function map(key, cmd, desc)
                         vim.keymap.set("n", key, cmd, { buffer = bufnr, desc = desc })
                     end
-                    map("<leader>FR", "<cmd>FlutterRun<cr>", "Flutter Run")
+                    -- FlutterRun inicia uma sessão de DAP por conta própria:
+                    -- o debugger_runner do flutter-tools faz require("dap") e
+                    -- registra dap.adapters.dart sem passar pelo nosso
+                    -- lua/default/dap.lua. Sem o ensure() aqui, os listeners que
+                    -- abrem a dapui não existiriam e o app rodaria sem painéis.
+                    map("<leader>FR", function()
+                        require("default.dap").ensure()
+                        vim.cmd("FlutterRun")
+                    end, "Flutter Run")
                     map("<leader>Fd", "<cmd>FlutterDevices<cr>", "Flutter Devices")
                     map("<leader>Fe", "<cmd>FlutterEmulators<cr>", "Flutter Emulators")
                     map("<leader>Fq", "<cmd>FlutterQuit<cr>", "Flutter Quit")

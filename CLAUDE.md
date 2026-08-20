@@ -50,7 +50,7 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
 
 **`after/plugin/treesitter.lua` owns highlighting.** It guards on `vim.treesitter.highlighter.active[buf]` because `vim.treesitter.start()` builds a highlighter unconditionally and native ftplugins already start `lua`/`markdown`/`help`/`query`. It also sets treesitter folds, which is why `foldlevel`/`foldlevelstart` are 99 in `set.lua`.
 
-- 32 distinct languages resolve after install, against the 7 nvim ships. (`nvim_get_runtime_file("parser/*.so")` reports 39 because the 7 bundled ones are also in the install list and therefore present twice.)
+- 31 distinct languages resolve after install, against the 7 nvim ships. (`nvim_get_runtime_file("parser/*.so")` reports more, because the 7 bundled ones are also in the install list and so appear twice.) Removing a language from the list does **not** uninstall its parser — `scala` kept resolving until `:TSUninstall scala`.
 - Host prerequisite: `brew install tree-sitter-cli` (≥ 0.26.1). The `swift` parser needs it to generate.
 - Commands: `:TSInstall`, `:TSUpdate`, `:TSUninstall`, `:TSLog`, and `:checkhealth nvim-treesitter`.
 - To add a language, add it to the `install({...})` list and run `:TSUpdate`.
@@ -95,7 +95,7 @@ A missing formatter is not an error: conform marks it unavailable and either fal
 
 Before adding a keymap, grep for the key. `<leader>d` and `<leader>x` each had two owners at once, and in both cases the collision silently broke the older binding — `<leader>dd` was dead in every LSP buffer, and `<leader>xq` resolved to a command that does not exist.
 
-**which-key.nvim shows the continuations** after a prefix, which is why `timeoutlen` is deliberately left at its default of 1000 — the problem was never the wait, it was not remembering the key. Do not lower it as an "optimization": a short window makes deliberately-typed sequences fail, and this config has 79 `<leader>` mappings.
+**which-key.nvim shows the continuations** after a prefix, which is why `timeoutlen` is deliberately left at its default of 1000 — the problem was never the wait, it was not remembering the key. Do not lower it as an "optimization": a short window makes deliberately-typed sequences fail, and this config has 79 `<leader>` mappings in normal mode alone (100 counting every mode and buffer-local ones).
 
 **Still a rough edge:** a key that is both a complete mapping *and* a prefix pays `timeoutlen` before firing. The frequent offenders were fixed (Harpoon add → `<leader>A`, DAP UI → `<leader>D*`), but these remain, all pre-existing: `n` (vs `ntd`), `p` (vs `ptd`), `<leader>s` (vs 21 telescope maps), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`. Listed so a future keymap is not added to an already-crowded prefix without noticing.
 

@@ -57,11 +57,15 @@ If either binary is missing, `lsp_format = "fallback"` lets gopls format instead
 
 `golangci-lint` via nvim-lint (`after/plugin/linting.lua`), on `BufWritePost`, `BufReadPost` and `InsertLeave`, plus `<leader>ml` to run it manually.
 
+> **Missing linters are skipped.** `linting.lua` passes an `opts.filter` to `lint.try_lint` that checks `vim.fn.executable` on each linter's resolved `cmd`, because nvim-lint spawns without checking — that is what made every Swift buffer error out on an absent `swiftlint` (see [swift.md](swift.md#linting)). Go is unaffected in practice: with `golangci-lint` installed the filter passes it through, and `unusedfunc` / `unusedparams` diagnostics arrive as before. Expect a pause on the first lint of a package — golangci-lint compiles it.
+
 > This used to be a none-ls source with hardcoded `--out-format=json`, a flag removed in golangci-lint v2 — so it silently produced nothing. nvim-lint runs `golangci-lint version` and picks the flags per version (v1: `--out-format json`; v2.0.x: `--output.json.path=stdout`; v2.1+: same plus `--path-mode=abs`), passes `--issues-exit-code=0` so "found problems" is not treated as a tool failure, and resolves a standalone `.go` file through `go env GOMOD`. Verified working with v2.12.2.
 
 ## Debugging (DAP)
 
 Configured in `after/plugin/dap-go.lua`, previously inside `debugging.lua`.
+
+> The whole DAP stack is lazy: nothing debug-related loads until the first `F5` / `F9` / `<leader>Du` (or `<leader>tD` from neotest). The adapter and configurations below are *registered* through `require("default.dap").register(...)` and the body only runs when the stack initialises. See [dap-core.md](../plugins/dap-core.md).
 
 The adapter is registered as **`go`**, not `delve`: that is the name `neotest-golang` expects in its `dap_manual_config`, and it avoids maintaining two names for the same adapter. `dlv` resolves from Mason's `bin` directory, falling back to `PATH`.
 

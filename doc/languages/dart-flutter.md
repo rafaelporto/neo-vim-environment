@@ -85,7 +85,11 @@ All of them are buffer-local, registered in the `lsp.on_attach`.
 
 Other debugger options: `exception_breakpoints = {}` and `evaluate_to_string_in_debug_views = true`.
 
-The debug adapter is `flutter debug_adapter`, bundled with the Flutter SDK — no extra install needed.
+The debug adapter is `flutter debug_adapter`, bundled with the Flutter SDK — no extra install needed. Dart is the one language whose adapter is *not* registered through `require("default.dap").register(...)`: flutter-tools wires nvim-dap itself when it loads on `ft = dart`.
+
+> **The dapui panels come from `lua/default/dap.lua`, not from flutter-tools.** The listeners that open the UI on `launch`/`attach` and close it on `terminated`/`exited` are installed by `ensure()`. Because `FlutterRun` starts its own DAP session without going through that module, `<leader>FR` calls `ensure()` before issuing the command — otherwise the app would run under the debugger with no panels. `F5` / `F9` / `<leader>Du` / `<leader>tD` do the same. See [dap-core.md](../plugins/dap-core.md).
+
+> Not verified on this machine: there is no Flutter SDK here, so `find_flutter()` returns nil, `setup()` is skipped and the `<leader>F*` keymaps are never registered. The `ensure()` call on `<leader>FR` is reasoned from flutter-tools' `runners/debugger_runner.lua`, which does its own `require("dap")` and sets `dap.adapters.dart`.
 
 **Workflow:**
 1. `<leader>FR` — Flutter Run (through DAP)

@@ -31,7 +31,9 @@ The binary is not installed automatically; add it with `:MasonInstall csharpier`
 
 ## Debugging (DAP)
 
-Uses `netcoredbg`. Install once with `:MasonInstall netcoredbg`.
+Uses `netcoredbg`. Install once with `:MasonInstall netcoredbg`. Configured in `after/plugin/dap-dotnet.lua`.
+
+> The whole DAP stack is lazy: nothing debug-related loads until the first `F5` / `F9` / `<leader>Du` (or `<leader>tD` from neotest). The adapter and configurations below are *registered* through `require("default.dap").register(...)` and the body only runs when the stack initialises. See [dap-core.md](../plugins/dap-core.md).
 
 ### DAP Configurations
 
