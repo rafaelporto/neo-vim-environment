@@ -4,9 +4,11 @@ Plugin spec in `lua/default/plugins.lua`. There is deliberately **no** `after/pl
 
 ## Purpose
 
-After a prefix, which-key pops up the possible continuations with the `desc` of each mapping. This config declares around 120 `<leader>` mappings — 29 of them telescope's and 19 xcodebuild's — so it replaces having to remember them.
+After a prefix, which-key pops up the possible continuations with the `desc` of each mapping. This config declares **79 `<leader>` mappings in normal mode alone**, or 100 counting every mode plus the buffer-local ones present in a given buffer — so it replaces having to remember them.
 
-> **`timeoutlen` was deliberately not lowered.** The temptation with a deep leader tree is to shorten the wait. But the wait was never the problem: the problem was not knowing which key comes next, and a shorter `timeoutlen` only makes the ambiguity resolve faster, it does not tell you anything. which-key answers the actual question, so the default `timeoutlen` stays. The keymap moves that *were* made (see [keymaps.md](keymaps.md#recent-moves-and-why)) are a different fix for a different problem — a complete mapping sitting on a prefix, which costs the timeout on *every* use.
+The tree is lopsided, which is exactly why a popup helps. Counting normal-mode globals per prefix: `<leader>s` 22 (21 telescope pickers plus the substitute-word map), `<leader>t` 11 (neotest), `<leader>p` 8 (split between telescope, goto-preview and netrw), `<leader>g` 7, `<leader>n` 7 (noice), `<leader>v` 3, and the rest one or two each. On top of that, xcodebuild contributes 19 (18 normal + 1 visual) that are buffer-local to Swift/ObjC — they show up in the 100, never in the 79.
+
+> **`timeoutlen` was deliberately not lowered**, and stays at its default of 1000. The temptation with a leader tree this deep is to shorten the wait. But the wait was never the problem: the problem was not knowing which key comes next, and a shorter `timeoutlen` only makes the ambiguity resolve faster — it tells you nothing. Worse, a short window makes deliberately-typed sequences *fail*. which-key answers the actual question instead. The keymap moves that *were* made (see [keymaps.md](keymaps.md#recent-moves-and-why)) are a different fix for a different problem — a complete mapping sitting on a prefix, which costs the timeout on *every* use.
 
 ## Spec
 

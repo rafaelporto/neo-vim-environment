@@ -139,7 +139,9 @@ return {
                 return ctx.plugin and 0 or 200
             end,
             spec = {
-                { "<leader>a", group = "diagnostics / harpoon" },
+                -- só "diagnostics": o Harpoon add saiu deste prefixo para
+                -- <leader>A, que é mapa único e por isso não vira grupo.
+                { "<leader>a", group = "diagnostics" },
                 { "<leader>c", group = "code" },
                 { "<leader>D", group = "debug UI" },
                 { "<leader>F", group = "flutter" },
