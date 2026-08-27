@@ -320,10 +320,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		if client and client:supports_method("textDocument/codeLens") then
 			vim.keymap.set("n", "<leader>lc", vim.lsp.codelens.run,
 				{ buffer = bufnr, desc = "Run code lens" })
-			vim.api.nvim_create_autocmd({ "BufEnter", "InsertLeave", "BufWritePost" }, {
-				buffer = bufnr,
-				callback = function() vim.lsp.codelens.refresh({ bufnr = bufnr }) end,
-			})
+			-- enable(), não um autocmd chamando refresh(): o Provider instalado por
+			-- enable se atualiza sozinho via nvim_buf_attach (on_lines/on_reload, com
+			-- debounce de 200 ms), então o antigo autocmd de BufEnter/InsertLeave/
+			-- BufWritePost reimplementava pior o que o nvim já faz. E refresh() está
+			-- depreciado: hoje só delega para enable e sai no 0.13.
+			-- Simétrico ao bloco de inlay hints acima.
+			vim.lsp.codelens.enable(true, { bufnr = bufnr })
 		end
 	end,
 })
