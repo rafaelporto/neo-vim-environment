@@ -30,14 +30,20 @@ This is **merge layer 1**, so it applies to every server resolved through `vim.l
 **`ensure_installed`:** `vtsls`, `eslint`, `gopls`, `lua_ls`, `yamlls`, `jsonls`, `dockerls`
 
 ```lua
-automatic_enable = { exclude = { "ts_ls" } }
+automatic_enable = { exclude = { "ts_ls", "roslyn_ls" } }
 ```
 
 > **Why `ts_ls` is excluded:** `mason-lspconfig` auto-enables *every* installed server. `ts_ls` must never run alongside `vtsls` — duplicated diagnostics and double the memory. The exclusion is a guard in case the package gets reinstalled.
 
+> **Why `roslyn_ls` is excluded:** same shape. `mason-lspconfig` builds its package→server map from each installed package's `neovim.lspconfig` key, and `mason-org`'s `roslyn-language-server` carries `roslyn_ls`. Installing it would auto-enable a second Roslyn client next to the one `seblyng/roslyn.nvim` manages. The `roslyn` package this config actually installs (from the Crashdummyy registry) has no such key, so there is no collision today — this is a guard, not a fix.
+
+**Registries.** `mason.setup()` declares both `github:mason-org/mason-registry` and `github:Crashdummyy/mason-registry`. The second one is the only source of a package named `roslyn`; `mason-org` must stay listed explicitly, because declaring `registries` replaces the default list and omitting it would break gopls, vtsls and everything else. Registries are only fetched on demand by the `:Mason*` commands, so startup is unaffected.
+
 Servers not managed by Mason are configured the same way but must be reachable on their own: `sourcekit` (`sourcekit-lsp` on `PATH`, needs Xcode — see [swift.md](../languages/swift.md)), `dartls` (Flutter SDK, via flutter-tools), `roslyn` (manual `:MasonInstall roslyn`).
 
-> **Known and deliberate:** `after/plugin/roslyn.lua` calls `require("roslyn").setup()` at file level, which defeats the `ft = { "cs" }` gate on the plugin's own spec — the plugin loads in every session. It measures ~1.2 ms in total, and neither `roslyn` nor `dotnet` is installed on this machine, so the fix could not be tested. Left alone on purpose; moving the `require` into a `FileType` autocmd (the way `after/plugin/dap-swift.lua` does it) is the obvious change once there is a C# project to verify against.
+> **Fixed, previously a known exception:** `after/plugin/roslyn.lua` used to call `require("roslyn").setup()` at file level, defeating the `ft = { "cs" }` gate on its own spec. The plugin options moved to `opts = {}` on the lazy spec, so lazy calls `setup()` at load time and the file is now purely declarative — `vim.lsp.config("roslyn", …)` registers a merge layer without touching the module.
+>
+> What made it safe: `vim.lsp.enable()` ends with `vim.cmd.doautoall('nvim.lsp.enable FileType')`, guarded by `vim.v.vim_did_enter == 1 or vim.fn.did_filetype() == 1`. So when lazy loads the plugin on `FileType` and the plugin's `plugin/roslyn.lua` calls `vim.lsp.enable("roslyn")`, the `.cs` buffer that triggered the load still gets the client. Verified with `package.loaded["roslyn"] == nil` on a bare `nvim`. If it ever regresses, the fallback is an explicit `vim.lsp.enable("roslyn")` in this file, at the cost of loading the plugin at startup again.
 
 ## Enabled servers
 

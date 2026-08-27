@@ -73,7 +73,19 @@ local function neotest()
                                          -- treesitter não parseia (testWidgets)
                 }),
 
-                require("neotest-dotnet"),
+                require("neotest-dotnet")({
+                    -- Explícito, ainda que seja o default do adapter: ele emite
+                    -- `type = <adapter_name>` na estratégia de dap, e dap-dotnet.lua
+                    -- registra tanto `coreclr` quanto `netcoredbg`. Declarar aqui é
+                    -- o que impede o <leader>tD de voltar a apontar para um adapter
+                    -- inexistente se um dos dois nomes desaparecer.
+                    dap = { adapter_name = "netcoredbg" },
+                    -- Default é "project", que ancora a descoberta no .csproj do
+                    -- buffer atual — numa solution onde só um projeto tem testes,
+                    -- pedir <leader>ta de qualquer outro arquivo não acha nada.
+                    -- Custo: o dotnet test roda na solution inteira.
+                    discovery_root = "solution",
+                }),
             },
         })
     end

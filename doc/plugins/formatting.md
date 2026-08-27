@@ -22,7 +22,7 @@ The result: Swift was formatted by sourcekit, Dart by dartls and TypeScript by t
 | `dart` | `dart_format` | `fallback` |
 | `swift` | `swiftformat` | `fallback` |
 | `lua` | `stylua` | `fallback` |
-| `cs` | `csharpier` | `fallback` |
+| `cs` | `csharpier` (never installed — Roslyn formats) | `fallback` |
 | `sql` | `sqlfmt` | `fallback` |
 
 `default_format_opts` sets `timeout_ms = 1000` and `lsp_format = "fallback"` — the current spelling; `lsp_fallback` is deprecated.
@@ -87,7 +87,20 @@ The old `<leader>f` → `vim.lsp.buf.format` mapping was removed from `lua/defau
 | `stylua` | `stylua` | `:MasonInstall stylua` |
 | `swiftformat` | `swiftformat` | `brew install swiftformat` |
 | `dart_format` | `dart format` | Bundled with the Flutter/Dart SDK |
-| `csharpier` | `dotnet csharpier` if the dotnet tool is available, otherwise `csharpier` | `dotnet tool install csharpier` |
+| `csharpier` | `dotnet csharpier` if the dotnet tool is available, otherwise `csharpier` | **deliberately not installed** — see below |
+
+> **C# is formatted by Roslyn, not by csharpier.** The `cs = { "csharpier" }` entry stays on
+> purpose: with the binary absent conform marks it unavailable and `lsp_format = "fallback"`
+> routes the buffer to the language server, so installing csharpier later needs no config
+> change. It is left uninstalled because, unlike `prettier` and `biome`, it carries no
+> `require_cwd` — in a project without `.csharpierrc` it would reformat to its own defaults
+> (100 columns, its own ordering) and produce a large diff in code following another style.
+> The part that mattered is covered on the server side:
+> `["csharp|formatting"] = { dotnet_organize_imports_on_format = true }` in
+> `after/plugin/roslyn.lua` is the `goimports` equivalent for C#.
+>
+> conform's `csharpier` builtin already handles the 1.x CLI (the `format` subcommand) and
+> picks between `dotnet csharpier` and a bare `csharpier` at first format, not at startup.
 | `sqlfmt` | `sqlfmt` | `pip install shandy-sqlfmt` |
 
 Mason prepends its `bin` directory to `PATH`, so anything installed with `:MasonInstall` is found without further configuration.

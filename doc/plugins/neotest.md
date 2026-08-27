@@ -16,7 +16,7 @@ One test UI for every language: run the nearest test, the file or the whole suit
 | [neotest-vitest](https://github.com/marilari88/neotest-vitest) | JS/TS (Vitest) | `require("neotest-vitest")` |
 | [neotest-jest](https://github.com/nvim-neotest/neotest-jest) | JS/TS (Jest) | `require("neotest-jest")({})` |
 | [neotest-dart](https://github.com/sidlatau/neotest-dart) | Dart / Flutter | `require("neotest-dart")({ ... })` |
-| [neotest-dotnet](https://github.com/Issafalcon/neotest-dotnet) | C# | `require("neotest-dotnet")` |
+| [neotest-dotnet](https://github.com/Issafalcon/neotest-dotnet) | C# | `require("neotest-dotnet")({ … })` |
 
 Required dependencies: `plenary.nvim`, `nvim-nio` and `FixCursorHold.nvim`. `neotest-golang` is pinned with `version = "*"` so it tracks releases rather than `main`.
 
@@ -27,7 +27,14 @@ Every adapter module is a table carrying a `__call` metamethod, so **both forms 
 - `require("neotest-x")` — register the adapter with its defaults.
 - `require("neotest-x")({ ... })` — call it to apply options, and register the result.
 
-Passing options to the bare form (or forgetting the parentheses when you *do* have options) is the classic first-attempt error: the options are silently ignored, or neotest receives something it cannot use. Here `golang`, `jest` and `dart` are called; `vitest` and `dotnet` are registered bare because they run on defaults.
+Passing options to the bare form (or forgetting the parentheses when you *do* have options) is the classic first-attempt error: the options are silently ignored, or neotest receives something it cannot use. Here `golang`, `jest`, `dart` and `dotnet` are called; only `vitest` is registered bare, because it runs on defaults.
+
+`dotnet` receives two options, and both are worth knowing about:
+
+- `dap = { adapter_name = "netcoredbg" }` — the adapter's own default, stated anyway. neotest-dotnet emits `type = <adapter_name>` in its DAP strategy, and `after/plugin/dap-dotnet.lua` registers both `coreclr` and `netcoredbg`. Declaring the name is what keeps `<leader>tD` from silently pointing at a nonexistent adapter if either name goes away — which is exactly what happened while the adapter was registered bare and the config only defined `coreclr`.
+- `discovery_root = "solution"` — the default `"project"` anchors discovery to the current buffer's `.csproj`, so in a solution where only one project holds tests, `<leader>ta` from any other file finds nothing. The cost is that `dotnet test` runs across the whole solution.
+
+Two C# behaviours that look like bugs and are not: a test project can `<Compile Remove=…/>` entire directories, and tests inside them never appear because they are not in the compiled assembly; and a `.runsettings` file is not auto-discovered — point at it with `:NeotestSelectRunsettingsFile`.
 
 ## Go (neotest-golang)
 
@@ -92,5 +99,5 @@ The `<leader>t` namespace, all in normal mode:
 ## Known risks
 
 - **jest + vitest in the same `package.json` → duplicate entries.** Both adapters recognise the same `*.test.ts` / `*.spec.ts` files, and neotest asks every adapter. A project that lists both runners will show each test twice in the summary. Remove the adapter you do not use, or narrow it, if that becomes annoying.
-- **neotest-dotnet is looking for new maintainers** (see the banner in its README and upstream discussion #142). It works today; treat it as the least maintained piece of this setup.
+- **neotest-dotnet is looking for new maintainers** (see the banner in its README and upstream discussion #142). It works today; treat it as the least maintained piece of this setup. `easy-dotnet.nvim` is the modern alternative — solution explorer, dotnet commands and its own neotest adapter — and was considered and left out, to avoid a new global-tool dependency (`dotnet tool install -g EasyDotnet`) and churn in the `<leader>t` maps that already work for Go, Dart and JS. Revisit if this adapter breaks.
 - **`:checkhealth neotest-golang` false-alarms on testify.** With `testify_enabled = true` it reports two errors for `testify/namespace` and `testify/test_method`, because its `health.lua` looks for `namespace.scm` and `test_method.scm` — files the plugin does not ship. What the runtime actually loads is `features/testify/queries/go/{testify_method,suite,package}.scm`, all present. Test discovery was verified working with `testify_enabled` both `true` and `false`, finding the same tests either way.

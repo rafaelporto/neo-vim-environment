@@ -25,9 +25,28 @@ return {
     -- Do NOT call require("lspconfig") — use vim.lsp.config instead.
     { "neovim/nvim-lspconfig" },
     {
-        "seblj/roslyn.nvim",
+        -- O repo migrou de seblj/ para seblyng/. `opts` faz o lazy chamar
+        -- require("roslyn").setup(opts) no load, então after/plugin/roslyn.lua
+        -- não precisa mais chamá-lo — era esse require em nível de arquivo que
+        -- carregava o plugin em toda sessão e anulava o `ft` daqui.
+        -- Servidor: :MasonInstall roslyn (registry Crashdummyy, ver lsp.lua).
+        "seblyng/roslyn.nvim",
         ft = { "cs" },
-        dependencies = { "nvim-telescope/telescope.nvim" },
+        opts = {},
+    },
+    {
+        -- netcoredbg para o debug de C#. O pacote do mason-org entrega o binário
+        -- osx-amd64 para o target darwin_arm64, e um debugger x64 não anexa a um
+        -- processo arm64 (ICorDebug exige arquiteturas iguais). Este plugin traz
+        -- o build arm64 commitado no próprio repo e registra os adapters
+        -- `coreclr` e `netcoredbg`.
+        -- lazy sem `ft`/`cmd`: quem o carrega é o require dentro do closure de
+        -- after/plugin/dap-dotnet.lua, no primeiro F5. Sem `dependencies` no
+        -- nvim-dap de propósito — quando o closure roda, o dap já subiu pelo
+        -- ensure() de lua/default/dap.lua, e declarar a dependência arrastaria o
+        -- dap para o grafo do lazy.
+        "Cliffback/netcoredbg-macOS-arm64.nvim",
+        lazy = true,
     },
     { "ray-x/lsp_signature.nvim",     lazy = true },
     {
@@ -86,9 +105,9 @@ return {
                 "bash", "c", "c_sharp", "css", "dart", "diff", "dockerfile",
                 "gitcommit", "gitignore", "go", "gomod", "gosum", "gowork",
                 "html", "javascript", "jsdoc", "json", "lua", "luadoc",
-                "markdown", "markdown_inline", "query", "regex",
+                "markdown", "markdown_inline", "proto", "query", "regex",
                 "sql", "swift", "toml", "tsx", "typescript", "vim", "vimdoc",
-                "yaml",
+                "xml", "yaml",
             })
         end,
     },

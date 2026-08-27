@@ -32,9 +32,25 @@ After plugins load, Neovim's `after/plugin/` directory is sourced automatically.
 
 > One server bypasses the wildcard: `dartls`, which flutter-tools starts with a direct `vim.lsp.start` call rather than through `vim.lsp.config`. It sets `capabilities` itself, in the `lsp = {…}` block in `plugins.lua` — so a change to the shared capabilities has to be mirrored there.
 
-**Mason** manages LSP server installation. Servers are listed in `mason-lspconfig` ensure list in `after/plugin/lsp.lua`. Note `automatic_enable` there: mason-lspconfig enables every *installed* server, so `ts_ls` is explicitly excluded — it must never run alongside `vtsls`.
+**Mason** manages LSP server installation. Servers are listed in `mason-lspconfig` ensure list in `after/plugin/lsp.lua`. Note `automatic_enable` there: mason-lspconfig enables every *installed* server, so `ts_ls` and `roslyn_ls` are explicitly excluded — `ts_ls` must never run alongside `vtsls`, and `roslyn_ls` must never run alongside the client roslyn.nvim already manages.
 
-> **Exception — Roslyn (C#):** The Roslyn language server is **not** auto-installed. Install it manually inside Neovim with `:MasonInstall roslyn`. The `seblj/roslyn.nvim` plugin manages the LSP lifecycle but expects the binary to already exist in Mason's bin directory. See: https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#roslyn_ls
+> **Exception — Roslyn (C#):** The Roslyn language server is **not** auto-installed, and
+> `mason-org` has no package named `roslyn` — only `roslyn-language-server`, which lags the
+> version VS Code ships and whose spec carries `neovim.lspconfig = roslyn_ls`. So
+> `after/plugin/lsp.lua` declares a second registry, `github:Crashdummyy/mason-registry`,
+> whose `roslyn` package is version-matched to vscode-csharp, has a native `darwin_arm64`
+> asset, and exposes the bin name `roslyn-language-server` that the plugin looks for.
+> Install it manually inside Neovim with `:MasonInstall roslyn`; it needs the dotnet SDK on
+> `PATH`, because Roslyn loads the solution through that SDK's MSBuild.
+>
+> Do **not** switch to nvim-lspconfig's `roslyn_ls`: it is a different client, it does not
+> support Razor, and running it alongside `seblyng/roslyn.nvim` means two Roslyn servers per
+> buffer — which is what the `automatic_enable` exclusion above prevents.
+>
+> Diagnosing "nothing happens" is unusually hard here, so: `roslyn/utils.lua` never returns
+> `nil`. With nothing installed it falls through to the literal string
+> `"Microsoft.CodeAnalysis.LanguageServer"`, so `:checkhealth roslyn` reports *ok, found*
+> and the real error surfaces as a spawn failure when a `.cs` buffer opens.
 
 > **Exception — Flutter/Dart:** `dartls` is **not** installed via Mason; it ships with the Flutter SDK. The SDK is **discovered, not hardcoded** — see the Flutter section below.
 
@@ -50,10 +66,24 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
 
 **`after/plugin/treesitter.lua` owns highlighting.** It guards on `vim.treesitter.highlighter.active[buf]` because `vim.treesitter.start()` builds a highlighter unconditionally and native ftplugins already start `lua`/`markdown`/`help`/`query`. It also sets treesitter folds, which is why `foldlevel`/`foldlevelstart` are 99 in `set.lua`.
 
-- 31 distinct languages resolve after install, against the 7 nvim ships. (`nvim_get_runtime_file("parser/*.so")` reports more, because the 7 bundled ones are also in the install list and so appear twice.) Removing a language from the list does **not** uninstall its parser — `scala` kept resolving until `:TSUninstall scala`.
+- 34 distinct languages resolve after install, against the 7 nvim ships. That is 33 entries in the `install({...})` list plus `dtd`, which `xml` pulls in as a dependency and which therefore never appears in the list. (`nvim_get_runtime_file("parser/*.so")` reports more, because the 7 bundled ones are also in the install list and so appear twice.) Removing a language from the list does **not** uninstall its parser — `scala` kept resolving until `:TSUninstall scala`.
 - Host prerequisite: `brew install tree-sitter-cli` (≥ 0.26.1). The `swift` parser needs it to generate.
 - Commands: `:TSInstall`, `:TSUpdate`, `:TSUninstall`, `:TSLog`, and `:checkhealth nvim-treesitter`.
 - To add a language, add it to the `install({...})` list and run `:TSUpdate`.
+- `xml` is there for `.csproj`/`.slnx`/`.props`/`.targets` — nvim already maps those to the
+  `xml` filetype, they just had no parser. `proto` is there because a gRPC-heavy C# project
+  can hold as many `.proto` files as `.cs` ones, and without it they fall back to the legacy
+  `syntax/proto.vim`.
+- **Protobuf gets a parser and nothing else, deliberately.** `buf_ls`, the conform `buf`
+  formatter and the `buf_lint`/`protolint` linters were all considered and left out: they
+  need a `buf.yaml`, and a project that generates its stubs through MSBuild `<Protobuf
+  Include=…/>` (Grpc.Tools) has none. The formatter would be dead code — `conform`'s `buf`
+  declares `cwd = root_file({ "buf.yaml" })` and marks itself unavailable without it — and
+  `buf_ls` would start via its `.git` fallback but resolve no imports, filling the buffer
+  with "file not found" for code that builds fine. Revisit only if a project adopts buf.
+- `razor` is available upstream but not installed: nothing here uses `.razor`/`.cshtml`. The
+  Roslyn server does support Razor via co-hosting if that changes — add the parser and
+  `razor` to the plugin's `ft`.
 
 ## Language Support
 
@@ -63,7 +93,7 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
 | Swift/iOS | sourcekit-lsp | xcodebuild.nvim, conform (swiftformat), nvim-lint (swiftlint) |
 | Dart/Flutter | dartls (via flutter-tools.nvim) | flutter-tools.nvim (hot reload, devices, emulators, outline), conform (dart_format), Dart DAP (bundled with SDK), neotest-dart |
 | TypeScript/JS | vtsls + eslint | conform (prettier/biome from `node_modules`), js-debug-adapter (`after/plugin/dap-js.lua`), nvim-ts-autotag, neotest-vitest/jest |
-| C# | roslyn (seblj/roslyn.nvim) — **requires manual server install** | conform (csharpier, falls back to Roslyn), netcoredbg (DAP), neotest-dotnet |
+| C# | roslyn (seblyng/roslyn.nvim) — **requires manual server install, from a second Mason registry** | Roslyn is the sole formatter (csharpier deliberately not installed), netcoredbg via `netcoredbg-macOS-arm64.nvim` (DAP), neotest-dotnet |
 | Lua | lua_ls | workspace configured for nvim API, conform (stylua) |
 | JSON/YAML | jsonls + yamlls | schemastore.nvim for schema validation |
 
@@ -73,6 +103,7 @@ LSP servers come from Mason's `ensure_installed`. Everything else is installed m
 
 ```vim
 :MasonInstall gopls delve golangci-lint gofumpt goimports vtsls js-debug-adapter stylua
+:MasonInstall roslyn                          " C#, needs the Crashdummyy registry
 ```
 
 ```sh
@@ -81,6 +112,19 @@ brew install swiftformat swiftlint            # Swift, optional
 go install gotest.tools/gotestsum@latest      # neotest-golang runner
 npm i -D prettier                             # per project, never global
 ```
+
+**The .NET SDK does not come from Homebrew.** The `dotnet@6` formula was disabled upstream
+on 2025-11-12 and there is no `dotnet-sdk@6` cask, so older SDKs have to come from
+Microsoft's installer or `dotnet-install.sh`. Install oldest-first so the final host/muxer
+is the newest one, and point every SDK at the same root (`/usr/local/share/dotnet` on
+macOS) — a second root would make `dotnet --list-sdks` show only one of them. Microsoft's
+installer drops `/etc/paths.d/dotnet`, so `PATH` needs no shell config, but an already-open
+terminal will not see it: **open a new shell before starting Neovim**, or Mason and Roslyn
+inherit a `PATH` without `dotnet`.
+
+Building a target framework older than the newest installed SDK works — the SDK pulls the
+targeting pack from NuGet — but emits `NETSDK1138` (framework out of support) on every
+build. That is a warning, not an error; pin with `global.json` only if the project wants it.
 
 A missing formatter is not an error: conform marks it unavailable and either falls back to the language server or leaves the buffer alone (see below).
 
@@ -184,10 +228,19 @@ before-then-after comparisons on this machine drift with the page cache badly
 enough to hide a 50 ms change, and per-file `--startuptime` self-times are the
 stable signal.
 
-**Known exception, left on purpose:** `after/plugin/roslyn.lua` requires
-roslyn.nvim at startup and so defeats its own `ft = { "cs" }`. It measures ~1.2 ms
-and neither `roslyn` nor `dotnet` is installed here, so the fix could not be
-tested. Not worth an untestable change.
+**The roslyn.nvim exception is gone.** `after/plugin/roslyn.lua` used to call
+`require("roslyn").setup()` at file level, which loaded the plugin in every session and
+defeated its own `ft = { "cs" }`. The plugin options now live in `opts = {}` on the lazy
+spec, and the file is purely declarative: `vim.lsp.config("roslyn", …)` registers a merge
+layer without touching the module.
+
+What made this safe to change is that `vim.lsp.enable()` ends with
+`vim.cmd.doautoall('nvim.lsp.enable FileType')`, guarded by
+`vim.v.vim_did_enter == 1 or vim.fn.did_filetype() == 1`. So when lazy loads the plugin on
+`FileType` and the plugin's own `plugin/roslyn.lua` calls `vim.lsp.enable("roslyn")`, the
+`.cs` buffer that triggered the load still gets the client attached. If that ever regresses,
+the fallback is an explicit `vim.lsp.enable("roslyn")` in `lsp.lua` — at the cost of loading
+the plugin at startup again.
 
 ## Formatting and linting
 
@@ -196,6 +249,14 @@ tested. Not worth an untestable change.
 - `prettier` and `biome` resolve from the project's `node_modules/.bin`, so nothing is installed globally. Both carry `require_cwd = true`: with no config in the project they are marked unavailable rather than run with their own defaults.
 - The **web filetypes carry `lsp_format = "never"`**. Without it the global `lsp_format = "fallback"` sends the buffer to vtsls, which reformats with tsserver defaults and defeats `require_cwd`. Swift, C#, Dart and Go keep the fallback, where the language server is a legitimate formatter.
 - Go formats with `goimports` then `gofumpt`.
+- **C# is formatted by Roslyn, not by csharpier.** The `cs = { "csharpier" }` entry stays on
+  purpose — with the binary absent conform marks it unavailable and `lsp_format = "fallback"`
+  routes the buffer to Roslyn — so installing csharpier later needs no config change. It is
+  deliberately *not* installed: unlike prettier and biome it carries no `require_cwd`, so in a
+  project without `.csharpierrc` it would reformat to its own defaults and produce a large
+  diff in code that follows another style. Roslyn instead gets
+  `["csharp|formatting"] = { dotnet_organize_imports_on_format = true }` in
+  `after/plugin/roslyn.lua`, which is the `goimports` equivalent for C#.
 
 `after/plugin/linting.lua` covers `swift` (swiftlint) and `go` (golangcilint). Deliberately no eslint entry — the eslint LSP already provides diagnostics and adding it would double every warning.
 
@@ -211,6 +272,12 @@ tested. Not worth an untestable change.
 ## Filetype Associations
 
 Custom filetype assignments live in `after/plugin/filetypes.lua` via autocmds: JSON files (`.json`, `.jsonc`, `.json.base`) and shell files (`.sh`, `.zsh`, `.tmux`, zprofile). Treesitter language aliases (`jsonc`/`json5` → `json`, `zsh` → `bash`) are registered separately in `after/plugin/treesitter.lua`.
+
+Before adding an autocmd here, check `$VIMRUNTIME/lua/vim/filetype.lua` — nvim 0.12 already
+maps far more than it looks. `.csproj`/`.slnx`/`.csproj.user` → `xml`, `.sln` → `solution`,
+`.razor`/`.cshtml` → `razor`, `.proto` → `proto` all come from the runtime, so the .NET work
+needed parsers, not filetype rules. (`solution` has no treesitter parser upstream, so `.sln`
+stays unhighlighted.)
 
 ## Snippets
 

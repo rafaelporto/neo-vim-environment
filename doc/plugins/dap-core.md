@@ -77,9 +77,18 @@ One file per language — `debugging.lua` holds only the dapui layout and the gl
 |---|---|---|---|
 | Go | `after/plugin/dap-go.lua` | `go` (delve) | `:MasonInstall delve` |
 | JS / TS | `after/plugin/dap-js.lua` | `pwa-node`, `pwa-chrome` (js-debug-adapter) | `:MasonInstall js-debug-adapter` |
-| C# | `after/plugin/dap-dotnet.lua` | `coreclr` (netcoredbg) | `:MasonInstall netcoredbg` |
+| C# | `after/plugin/dap-dotnet.lua` | `coreclr` **and** `netcoredbg` (netcoredbg) | none — the arm64 binary ships inside `netcoredbg-macOS-arm64.nvim`. Do **not** `:MasonInstall netcoredbg` |
 | Swift / iOS | `after/plugin/dap-swift.lua` | wired by xcodebuild.nvim, from a `FileType` autocmd | none — Xcode 16+ needs no `codelldb` |
 | Dart / Flutter | `lua/default/plugins.lua` (flutter-tools spec) | `flutter debug_adapter` | none — bundled with the SDK |
+
+> **Why C# does not use Mason's netcoredbg:** the package serves
+> `netcoredbg-osx-amd64.tar.gz` to the `darwin_arm64` target, and a x64 debugger cannot
+> attach to an arm64 process — netcoredbg goes through `dbgshim`/`ICorDebug`, which requires
+> matching architectures. `Cliffback/netcoredbg-macOS-arm64.nvim` ships an arm64 build
+> committed in its own repo, so the lazy clone *is* the install. Its `setup()` registers both
+> adapter names, and `netcoredbg` is the one neotest-dotnet asks for. `dap-dotnet.lua` calls
+> that `setup()` before overwriting `dap.configurations.cs`, because the plugin defines a
+> `configurations.cs` of its own and the last writer wins.
 
 > There is **no** `after/plugin/flutter.lua`. Flutter's config is inline in the `akinsho/flutter-tools.nvim` spec in `lua/default/plugins.lua`, deliberately: `ft = { "dart" }` keeps the plugin, its ~25 commands and its DAP wiring out of every non-Dart session, which an `after/plugin/` file would undo by running at startup.
 

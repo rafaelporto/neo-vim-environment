@@ -5,7 +5,18 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 -- ─── Mason ────────────────────────────────────────────────────────────────────
-require("mason").setup({})
+-- O registry Crashdummyy fornece o pacote `roslyn` (mesma versão usada no
+-- vscode-csharp, com asset nativo darwin_arm64). Não existe pacote `roslyn` no
+-- registry mason-org — só `roslyn-language-server`, da nuget.org e atrás do
+-- vscode —, então sem esta lista o `:MasonInstall roslyn` falha com 404.
+-- mason-org fica explícito de propósito: declarar `registries` substitui o
+-- default, e omitir mason-org quebraria gopls, vtsls e todo o resto.
+require("mason").setup({
+	registries = {
+		"github:mason-org/mason-registry",
+		"github:Crashdummyy/mason-registry",
+	},
+})
 require("mason-lspconfig").setup({
 	ensure_installed = {
 		"vtsls",
@@ -19,7 +30,12 @@ require("mason-lspconfig").setup({
 	-- mason-lspconfig auto-habilita todo servidor instalado. ts_ls nunca deve
 	-- subir junto do vtsls (diagnostics duplicados + memória dobrada), então
 	-- fica excluído aqui como garantia caso o pacote seja reinstalado.
-	automatic_enable = { exclude = { "ts_ls" } },
+	-- roslyn_ls pelo mesmo motivo: o pacote `roslyn-language-server` do mason-org
+	-- carrega `neovim.lspconfig = roslyn_ls`, então se ele for instalado o
+	-- automatic_enable subiria um segundo cliente Roslyn junto do que o
+	-- roslyn.nvim já gerencia. O pacote `roslyn` do Crashdummyy não tem essa
+	-- chave, então hoje não há colisão — isto é garantia, não correção.
+	automatic_enable = { exclude = { "ts_ls", "roslyn_ls" } },
 })
 
 -- ─── Diagnostics ──────────────────────────────────────────────────────────────
