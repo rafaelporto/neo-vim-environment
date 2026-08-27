@@ -96,9 +96,36 @@ end
 vim.keymap.set("n", "<F9>", action("toggle_breakpoint"), { desc = "Toggle breakpoint" })
 vim.keymap.set("n", "<F5>", action("continue"), { desc = "Continue debug" })
 vim.keymap.set("n", "<F11>", action("step_into"), { desc = "Step into" })
-vim.keymap.set("n", "<s-F11>", action("step_out"), { desc = "Step out" })
 vim.keymap.set("n", "<F10>", action("step_over"), { desc = "Step over" })
-vim.keymap.set("n", "<s-F5>", action("close"), { desc = "Stop debug" })
+
+-- Stop e step out ficam em DUAS teclas cada, e isso não é redundância.
+--
+-- Sob o terminfo `xterm-256color` — que é o que o tmux anuncia aqui — Shift+F5 e
+-- F17 são *a mesma sequência de bytes*: `infocmp` mostra `kf17=\E[15;2~`, onde o
+-- `;2` é justamente o modificador Shift. O nvim casa o nome `kf17` antes de
+-- chegar a interpretar o modificador, então `<s-F5>` nunca dispara e o que chega
+-- é `<F17>`. O mesmo vale para Shift+F11 -> `<F23>`.
+--
+-- Isso não é bug do nvim nem do tmux: os terminfos da família xterm definem
+-- kf13..kf63 como os aliases modificados de kf1..kf12, então a ambiguidade é
+-- por construção. Sob `tmux-256color`, que não define kf17, chegaria `<s-F5>`.
+-- Trocar o default-terminal do tmux foi considerado e rejeitado: exige tmux >=
+-- 3.2 e o pacote de terminfo `ncurses-term` no destino, e muda o mecanismo de
+-- alternate character set (SI/SO em vez de SCS), o que afeta TUI ncurses antigo.
+-- Custo alto para o ganho de duas teclas. Nada neste config nem em nenhum plugin
+-- usa F13..F24, então os dois nomes convivem sem colisão.
+--
+-- terminate(), não close(): o close() do nvim-dap só desmonta a sessão do lado do
+-- editor e não pede nada ao adapter, então os eventos `terminated`/`exited` do
+-- protocolo nunca chegam — e são eles que fecham a dapui (ver os listeners em
+-- lua/default/dap.lua). O resultado era painel aberto depois de parar, e risco de
+-- processo depurado órfão. terminate() pede o encerramento ao adapter.
+for _, key in ipairs({ "<s-F11>", "<F23>" }) do
+    vim.keymap.set("n", key, action("step_out"), { desc = "Step out" })
+end
+for _, key in ipairs({ "<s-F5>", "<F17>" }) do
+    vim.keymap.set("n", key, action("terminate"), { desc = "Stop debug" })
+end
 
 -- <leader>Du / <leader>Dc e não <leader>du / <leader>duc: <leader>d é o
 -- delete-sem-yank, um OPERATOR, então enquanto houvesse um <leader>du toda
