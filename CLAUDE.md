@@ -122,6 +122,17 @@ installer drops `/etc/paths.d/dotnet`, so `PATH` needs no shell config, but an a
 terminal will not see it: **open a new shell before starting Neovim**, or Mason and Roslyn
 inherit a `PATH` without `dotnet`.
 
+**`PATH` is not enough — `DOTNET_ROOT` has to be right or unset.** A self-contained apphost,
+which is what the Roslyn server binary is, trusts `DOTNET_ROOT` *exclusively* and does not
+fall back to the default locations when it is set. Pointing it at a directory with no
+`shared/Microsoft.NETCore.App` kills the server even though `dotnet` works in the shell. The
+trap: `~/.dotnet` looks like the answer and is not — it is where
+`dotnet tool install --global` puts tools, so it springs into existence, runtime-less, the
+first time you install any global tool, and a profile guarding on `[[ -d "$HOME/.dotnet" ]]`
+goes from dead code to actively wrong at that moment. The symptom is
+`Client roslyn quit with exit code 131`, and the cause appears only in `:LspLog`. See
+[doc/languages/csharp.md](doc/languages/csharp.md) for the diagnosis and the fix.
+
 Building a target framework older than the newest installed SDK works — the SDK pulls the
 targeting pack from NuGet — but emits `NETSDK1138` (framework out of support) on every
 build. That is a warning, not an error; pin with `global.json` only if the project wants it.

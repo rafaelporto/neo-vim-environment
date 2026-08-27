@@ -19,6 +19,39 @@ oldest-first so the final host/muxer is the newest, and keep them in the same ro
 the `dotnet@6` formula was disabled upstream on 2025-11-12 and there is no `dotnet-sdk@6`
 cask.
 
+### `PATH` is not enough — check `DOTNET_ROOT`
+
+The server binary is a self-contained apphost, and an apphost trusts `DOTNET_ROOT`
+*exclusively*: if that variable is set, it does not fall back to the default locations. So a
+`DOTNET_ROOT` pointing at a directory with no runtime in it kills the server even though
+`dotnet` is on `PATH` and works fine in the shell.
+
+The trap is that `~/.dotnet` is a plausible-looking wrong answer. It is where
+`dotnet tool install --global` puts things, so it gets created — holding only
+`tools/`, caches and sentinels, no `shared/Microsoft.NETCore.App` — the first time you
+install any global tool. A shell profile guarding on `[[ -d "$HOME/.dotnet" ]]` is dead code
+until that moment and wrong from then on.
+
+Symptom in Neovim: `Client roslyn quit with exit code 131 and signal 0`, which says nothing
+about the cause. The cause is only in `:LspLog`:
+
+```
+You must install .NET to run this application.
+.NET location: Not found
+  Environment variable:
+    DOTNET_ROOT = /Users/<you>/.dotnet
+```
+
+Diagnose by running the server by hand — it prints its version when it can start:
+
+```sh
+DOTNET_ROOT=/usr/local/share/dotnet ~/.local/share/nvim/mason/bin/roslyn-language-server --version
+```
+
+Fix it in the shell profile by probing for `shared/Microsoft.NETCore.App` instead of for a
+bare directory, checking the system root before the user one. Leaving `DOTNET_ROOT` unset
+also works — then the apphost searches the default locations.
+
 ## LSP
 
 [seblyng/roslyn.nvim](https://github.com/seblyng/roslyn.nvim) manages the Roslyn language
