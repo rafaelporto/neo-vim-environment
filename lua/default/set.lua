@@ -1,7 +1,6 @@
 -- ─── UI ───────────────────────────────────────────────────────────────────────
 vim.opt.guicursor = ""
 vim.opt.termguicolors = true
-vim.opt.colorcolumn = "80"
 vim.opt.signcolumn = "yes"
 vim.opt.scrolloff = 8
 vim.opt.wrap = false
@@ -42,7 +41,3 @@ vim.opt.updatetime = 50
 -- markdown
 vim.g["mkdp_auto_start"] = 0
 vim.g["mkdp_refresh_slow"] = 0
-
--- copilot
-vim.g.copilot_assume_mapped = true
-vim.g.copilot_no_tab_map = true

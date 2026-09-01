@@ -107,7 +107,6 @@ See [doc/plugins/neotest.md](doc/plugins/neotest.md).
 
 | Plugin | Purpose |
 |---|---|
-| [github/copilot.vim](https://github.com/github/copilot.vim) | AI completions (`<C-j>` to accept) |
 | [numToStr/Comment.nvim](https://github.com/numToStr/Comment.nvim) | Toggle comments (`gcc`, `gc`) |
 | [tpope/vim-surround](https://github.com/tpope/vim-surround) | Surround motions (`ys`, `cs`, `ds`) |
 | [folke/todo-comments.nvim](https://github.com/folke/todo-comments.nvim) | Highlight and navigate TODO/FIXME/etc |

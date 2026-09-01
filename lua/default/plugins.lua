@@ -7,11 +7,6 @@ return {
 	{ "dracula/vim", name = "dracula-theme", priority = 1000 },
 	"mbbill/undotree",
 	{
-		"github/copilot.vim",
-		lazy = false,
-		enabled = true,
-	},
-	{
 		"williamboman/mason.nvim",
 		build = function()
 			pcall(vim.cmd, "MasonUpdate")
