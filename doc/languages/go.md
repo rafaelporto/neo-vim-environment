@@ -1,6 +1,6 @@
 # Go
 
-Configuration in `after/plugin/lsp.lua` (gopls), `after/plugin/formatting.lua` (goimports + gofumpt), `after/plugin/linting.lua` (golangci-lint), `after/plugin/dap-go.lua` (delve) and `after/plugin/neotest.lua` (tests).
+Configuration in `after/plugin/lsp.lua` (gopls), `after/plugin/formatting.lua` (formatters resolved from the repo), `after/plugin/linting.lua` (golangci-lint), `after/plugin/dap-go.lua` (delve) and `after/plugin/neotest.lua` (tests).
 
 ## Install
 
@@ -9,7 +9,8 @@ Configuration in `after/plugin/lsp.lua` (gopls), `after/plugin/formatting.lua` (
 | `gopls` | Mason `ensure_installed` — auto-installed |
 | `delve` | `:MasonInstall delve` |
 | `golangci-lint` | `:MasonInstall golangci-lint` (or keep it in PATH) |
-| `goimports` / `gofumpt` | `:MasonInstall goimports gofumpt` — optional, gopls formats as fallback |
+| `gofmt` | Ships with the Go SDK — nothing to install |
+| `goimports` / `gofumpt` | `:MasonInstall goimports gofumpt` — used only in repositories with no `.golangci` |
 | `gotestsum` | `go install gotest.tools/gotestsum@latest` — required by the neotest runner |
 
 Mason prepends its `bin` directory to `PATH`, so anything installed there is found by conform and nvim-lint without extra configuration.
@@ -22,7 +23,7 @@ Mason prepends its `bin` directory to `PATH`, so anything installed there is fou
 
 | Setting | Value | Effect |
 |---|---|---|
-| `gofumpt` | `true` | gopls formats with gofumpt rules (also the formatting fallback) |
+| `gofumpt` | `true` | gopls formats with gofumpt rules — reached only when conform has nothing to run (see [Formatting](#formatting)) |
 | `staticcheck` | `true` | staticcheck diagnostics inside gopls |
 | `usePlaceholders` | `true` | completion inserts parameter placeholders |
 | `completeUnimported` | `true` | completes symbols from packages not yet imported |
@@ -37,7 +38,7 @@ Mason prepends its `bin` directory to `PATH`, so anything installed there is fou
 
 `generate`, `test`, `tidy`, `upgrade_dependency`, `vendor`, `run_govulncheck`, `regenerate_cgo` (`gc_details` is off).
 
-Code lenses refresh on `BufEnter`, `InsertLeave` and `BufWritePost`, and run with `<leader>lc` — the keymap is created by the `LspAttach` handler only for servers that advertise `textDocument/codeLens`.
+Code lenses are enabled on attach with `vim.lsp.codelens.enable()` and run with `<leader>lc` — the keymap is created by the `LspAttach` handler only for servers that advertise `textDocument/codeLens`. The provider refreshes itself through `nvim_buf_attach` (200 ms debounce); there is no refresh autocmd.
 
 ### Inlay hints
 
@@ -49,9 +50,29 @@ All standard LSP keymaps apply (see [lsp-core.md](../plugins/lsp-core.md)). Note
 
 ## Formatting
 
-`goimports` then `gofumpt` via conform.nvim (`after/plugin/formatting.lua`) — imports are organized first, layout second. Runs on save and with `<leader>f`.
+**The repository decides, not this config.** `formatters_by_ft.go` in `after/plugin/formatting.lua` is a function, not a list. It walks up from the buffer for `.golangci.{yml,yaml,toml,json}` and resolves:
 
-If either binary is missing, `lsp_format = "fallback"` lets gopls format instead, which produces the same result because `gofumpt = true` is set above.
+| What the repository has | Formatters | `lsp_format` |
+|---|---|---|
+| `.golangci` declaring formatters | exactly those, ordered `gci` → `goimports` → `gofmt` → `gofumpt` → `golines` | `never` |
+| `.golangci` with no formatter declared | `gofmt` | `never` |
+| no `.golangci` | `goimports` → `gofumpt` | `fallback` (the global default) |
+
+Declared formatters are read from `formatters.enable` (golangci v2) or from formatter entries inside `linters.enable` (v1). The scan is a flat indentation walk over every `enable:` list in the file, filtered against the five names above — it never needs to know which block it is in. `disable:` lists are not read. Runs on save and with `<leader>f`; `:ConformInfo` shows what the current buffer resolved to.
+
+The result is memoised per root (`vim.fs.root` on `go.mod` / `.git`), so editing a `.golangci` takes effect only in the next Neovim session.
+
+### Why
+
+gofumpt output is *gofmt-stable* — it is a strict superset, so running plain `gofmt` over a gofumpt-formatted file changes nothing. In a repository whose own standard is plain `gofmt`, that means the repo's formatter never undoes gofumpt: every line gofumpt rewrote, including lines you never touched, rides along into the commit. Same for `goimports` regrouping an import block that the repository keeps as one group.
+
+`lsp_format = "never"` on the two declared branches is not decoration: gopls carries `gofumpt = true` (see [Settings](#settings)), so a `"fallback"` there would hand the buffer right back to gofumpt and undo the whole thing.
+
+### Imports
+
+`gofmt` does not touch the import block, so in a repository that resolves to it an unused import is no longer removed on save — and in Go that is a compile error, not a style nit. gopls flags it as a diagnostic either way, and `<leader>lo` runs the server's `source.organizeImports` on demand.
+
+It is deliberately not wired into the save hook: organizing imports is precisely what regroups an import block that the repository keeps as one group, which is the drift this section exists to avoid.
 
 ## Linting
 

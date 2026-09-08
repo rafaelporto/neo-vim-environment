@@ -105,12 +105,14 @@ Virtual text is on by default. Toggle between inline virtual text and underline-
 
 ### Capability-gated keymaps
 
-Both are registered inside `LspAttach` only when the attached client advertises the method, so they are absent rather than broken on servers that do not implement it.
+Each is registered inside `LspAttach` only when the attached client advertises the method, so they are absent rather than broken on servers that do not implement it.
 
 | Key | Gate | Action |
 |---|---|---|
 | `<leader>lh` | `textDocument/inlayHint` | Toggle inlay hints for the buffer |
 | `<leader>lc` | `textDocument/codeLens` | Run the code lens under the cursor |
+| `<leader>lo` | `textDocument/codeAction` | Run the server's `source.organizeImports` |
 
 - **Inlay hints** are enabled automatically on attach. `dartls` does not implement `textDocument/inlayHint`, so nothing is registered there — its equivalent is flutter-tools' closing labels.
-- **Code lens** also installs a refresh autocmd on `BufEnter`, `InsertLeave` and `BufWritePost` for that buffer. `gopls` exposes `generate`, `tidy`, `test` and `run_govulncheck` here.
+- **Code lens** is enabled on attach with `vim.lsp.codelens.enable()`, whose provider refreshes itself via `nvim_buf_attach` with a 200 ms debounce — there is no refresh autocmd any more, and `vim.lsp.codelens.refresh()` is deprecated (delegates to `enable`, removed in 0.13). `gopls` exposes `generate`, `tidy`, `test` and `run_govulncheck` here.
+- **Organize imports** is on demand, never on save. In Go the save formatter is resolved from the repository and may be plain `gofmt`, which does not manage imports — see [go.md](../languages/go.md#imports).

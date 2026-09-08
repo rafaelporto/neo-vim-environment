@@ -18,7 +18,7 @@ Defined in `lua/default/remap.lua`. Active in all buffers regardless of filetype
 | `<leader>f` | Format (conform) |
 | `<leader>F` | Flutter (Dart buffers only) |
 | `<leader>g` | Git and LSP goto (Telescope) |
-| `<leader>l` | LSP toggles (`lh`, `lc`, `lu`) |
+| `<leader>l` | LSP toggles and actions (`lh`, `lc`, `lo`, `lu`) |
 | `<leader>m` | Lint (`ml`) |
 | `<leader>n` | Noice |
 | `<leader>p` | Find files, previews, paste |
@@ -101,12 +101,13 @@ Set in `after/plugin/neotest.lua`. Full detail in [neotest.md](neotest.md).
 
 ## LSP additions
 
-Set in `after/plugin/lsp.lua` on `LspAttach`, both gated on client capability. Full list in [lsp-core.md](lsp-core.md).
+Set in `after/plugin/lsp.lua` on `LspAttach`, most gated on client capability. Full list in [lsp-core.md](lsp-core.md).
 
 | Key | Action |
 |---|---|
 | `<leader>lh` | Toggle inlay hints (enabled on attach) |
 | `<leader>lc` | Run code lens |
+| `<leader>lo` | Organize imports (LSP code action) |
 | `<leader>ad` | Buffer diagnostics → loclist |
 
 ## Diagnostics lists — `<leader>a`

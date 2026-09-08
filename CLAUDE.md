@@ -89,7 +89,7 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
 
 | Language | LSP | Extras |
 |---|---|---|
-| Go | gopls (gofumpt, staticcheck, analyses, inlay hints, codelenses) | conform (goimports + gofumpt), nvim-lint (golangci-lint), delve (`after/plugin/dap-go.lua`), neotest-golang |
+| Go | gopls (gofumpt, staticcheck, analyses, inlay hints, codelenses) | conform (formatters declared by the repo's `.golangci`, else goimports + gofumpt), nvim-lint (golangci-lint), delve (`after/plugin/dap-go.lua`), neotest-golang |
 | Swift/iOS | sourcekit-lsp | xcodebuild.nvim, conform (swiftformat), nvim-lint (swiftlint) |
 | Dart/Flutter | dartls (via flutter-tools.nvim) | flutter-tools.nvim (hot reload, devices, emulators, outline), conform (dart_format), Dart DAP (bundled with SDK), neotest-dart |
 | TypeScript/JS | vtsls + eslint | conform (prettier/biome from `node_modules`), js-debug-adapter (`after/plugin/dap-js.lua`), nvim-ts-autotag, neotest-vitest/jest |
@@ -112,6 +112,10 @@ brew install swiftformat swiftlint            # Swift, optional
 go install gotest.tools/gotestsum@latest      # neotest-golang runner
 npm i -D prettier                             # per project, never global
 ```
+
+`gofmt` is in neither list: it ships with the Go SDK (`$(go env GOROOT)/bin`) and is on `PATH`
+wherever Go is. It matters now, because a repository that declares no formatter of its own resolves
+to `gofmt` alone.
 
 **The .NET SDK does not come from Homebrew.** The `dotnet@6` formula was disabled upstream
 on 2025-11-12 and there is no `dotnet-sdk@6` cask, so older SDKs have to come from
@@ -146,7 +150,7 @@ A missing formatter is not an error: conform marks it unavailable and either fal
 
 ### Namespaces
 
-`<leader>a` diagnostics (`aa`/`ad`/`ae`/`aq`/`aw`) · `<leader>A` Harpoon add · `<leader>c` code actions + chmod · `<leader>d` delete-without-yank · `<leader>D` DAP UI · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (buffer-local to Swift)
+`<leader>a` diagnostics (`aa`/`ad`/`ae`/`aq`/`aw`) · `<leader>A` Harpoon add · `<leader>c` code actions + chmod · `<leader>d` delete-without-yank · `<leader>D` DAP UI · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles and actions · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (buffer-local to Swift)
 
 Before adding a keymap, grep for the key. `<leader>d` and `<leader>x` each had two owners at once, and in both cases the collision silently broke the older binding — `<leader>dd` was dead in every LSP buffer, and `<leader>xq` resolved to a command that does not exist.
 
@@ -258,8 +262,19 @@ the plugin at startup again.
 `after/plugin/formatting.lua` is the only place conform is configured, and it holds the single `BufWritePre` hook. That hook runs `:LspEslintFixAll` first when an eslint client is attached, then `conform.format` — one autocmd, explicit order, because two separate autocmds would leave ordering to registration order and let the formatter win over eslint's rewrites.
 
 - `prettier` and `biome` resolve from the project's `node_modules/.bin`, so nothing is installed globally. Both carry `require_cwd = true`: with no config in the project they are marked unavailable rather than run with their own defaults.
-- The **web filetypes carry `lsp_format = "never"`**. Without it the global `lsp_format = "fallback"` sends the buffer to vtsls, which reformats with tsserver defaults and defeats `require_cwd`. Swift, C#, Dart and Go keep the fallback, where the language server is a legitimate formatter.
-- Go formats with `goimports` then `gofumpt`.
+- The **web filetypes carry `lsp_format = "never"`**. Without it the global `lsp_format = "fallback"` sends the buffer to vtsls, which reformats with tsserver defaults and defeats `require_cwd`. Swift, C# and Dart keep the fallback, where the language server is a legitimate formatter; Go keeps it only when the repository declares no formatter of its own (next bullet).
+- **Go follows the repository, not this config.** `formatters_by_ft.go` is a function: it walks up
+  for `.golangci.{yml,yaml,toml,json}` and returns the formatters the repo declares (`formatters:`
+  in golangci v2, formatter entries under `linters.enable` in v1). A `.golangci` with no formatter
+  declared resolves to `gofmt` alone; no `.golangci` at all resolves to `goimports` + `gofumpt`.
+  Whenever the repo declared something the entry also carries `lsp_format = "never"`, because gopls
+  has `gofumpt = true` and would otherwise reintroduce through the fallback exactly what the
+  resolution avoided. Memoised per root. Imports are no longer organized on save — `<leader>lo`
+  runs the language server's `source.organizeImports` on demand.
+
+  This exists because gofumpt output is *gofmt-stable*: a repository whose standard is plain gofmt
+  will not undo it, so every gofumpt rewrite of a line you never touched rides along into the
+  commit.
 - **C# is formatted by Roslyn, not by csharpier.** The `cs = { "csharpier" }` entry stays on
   purpose — with the binary absent conform marks it unavailable and `lsp_format = "fallback"`
   routes the buffer to Roslyn — so installing csharpier later needs no config change. It is

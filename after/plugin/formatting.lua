@@ -8,6 +8,63 @@
 
 local conform = require("conform")
 
+-- ─── Go: o padrão é o do repositório ─────────────────────────────────────────
+-- goimports+gofumpt num repo que formata com gofmt puro suja o diff: a saída do
+-- gofumpt é gofmt-estável, então o gofmt do repo NÃO desfaz — a reformatação de
+-- linhas não tocadas vai junto no commit.
+local GO_FORMATTERS = { "gci", "goimports", "gofmt", "gofumpt", "golines" }
+local go_default = { "goimports", "gofumpt" }
+local go_cache = {}
+
+local function go_declared(dir)
+    local cfg = vim.fs.find(
+        { ".golangci.yml", ".golangci.yaml", ".golangci.toml", ".golangci.json" },
+        { upward = true, path = dir, type = "file" }
+    )[1]
+    if not cfg then
+        return go_default
+    end
+
+    -- Varredura por indentação, não parser de YAML: só interessa quais dos
+    -- cinco nomes acima aparecem sob algum `enable:`, e essa lista é plana.
+    -- Serve v1 (formatters vivem em linters.enable) e v2 (formatters.enable)
+    -- sem precisar saber em qual bloco está.
+    local declared, in_enable = {}, false
+    for _, line in ipairs(vim.fn.readfile(cfg)) do
+        local inline = line:match("^%s+enable:%s*%[(.*)%]")
+        if inline then
+            for name in inline:gmatch("[%w_]+") do
+                declared[name] = true
+            end
+        elseif line:match("^%S") then
+            in_enable = false
+        elseif line:match("^%s+enable:%s*$") then
+            in_enable = true
+        elseif in_enable then
+            local name = line:match("^%s+%-%s*([%w_]+)")
+            if name then
+                declared[name] = true
+            elseif line:match("%S") and not line:match("^%s*#") then
+                in_enable = false
+            end
+        end
+    end
+
+    local resolved = {}
+    for _, name in ipairs(GO_FORMATTERS) do
+        if declared[name] then
+            table.insert(resolved, name)
+        end
+    end
+    if #resolved == 0 then
+        resolved = { "gofmt" }
+    end
+    -- O repo declarou um padrão, então o gopls não pode entrar como fallback:
+    -- o `gofumpt = true` de lsp.lua reintroduziria exatamente o que se evitou.
+    resolved.lsp_format = "never"
+    return resolved
+end
+
 conform.setup({
     formatters_by_ft = {
         -- Web: biome se o projeto tiver biome.json, senão prettier, senão nada.
@@ -34,7 +91,15 @@ conform.setup({
         -- Toolchains nativas. Aqui o fallback do LSP é desejado: binário ausente
         -- => sourcekit/roslyn/dartls/gopls formatam, que é o mesmo resultado que
         -- a ferramenta dedicada produziria.
-        go    = { "goimports", "gofumpt" },
+        go = function(bufnr)
+            local name = vim.api.nvim_buf_get_name(bufnr)
+            local dir = name ~= "" and vim.fs.dirname(name) or assert(vim.uv.cwd())
+            local root = vim.fs.root(dir, { "go.mod", ".git" }) or dir
+            if go_cache[root] == nil then
+                go_cache[root] = go_declared(dir)
+            end
+            return go_cache[root]
+        end,
         dart  = { "dart_format" },
         swift = { "swiftformat" },
         lua   = { "stylua" },

@@ -18,7 +18,7 @@ The result: Swift was formatted by sourcekit, Dart by dartls and TypeScript by t
 |---|---|---|
 | `javascript`, `javascriptreact`, `typescript`, `typescriptreact`, `json`, `jsonc` | `biome` → `prettier` (`stop_after_first`) | `never` |
 | `css`, `html`, `yaml`, `markdown`, `graphql` | `prettier` | `never` |
-| `go` | `goimports` → `gofumpt` | `fallback` |
+| `go` | resolved from the repo — see [go.md](../languages/go.md#formatting) | `never` / `fallback` |
 | `dart` | `dart_format` | `fallback` |
 | `swift` | `swiftformat` | `fallback` |
 | `lua` | `stylua` | `fallback` |
@@ -26,6 +26,8 @@ The result: Swift was formatted by sourcekit, Dart by dartls and TypeScript by t
 | `sql` | `sqlfmt` | `fallback` |
 
 `default_format_opts` sets `timeout_ms = 1000` and `lsp_format = "fallback"` — the current spelling; `lsp_fallback` is deprecated.
+
+> **`go` is the one entry that is a function, not a list.** conform accepts `fun(bufnr) -> table` as a filetype value, and the Go entry uses it to read the repository's `.golangci` and return the formatters that repository declares, with `lsp_format` set to match. Memoised per root. Full rules in [go.md](../languages/go.md#formatting).
 
 ## The biome → prettier cascade
 
@@ -53,7 +55,7 @@ Each formatter has a `cwd` function that walks up looking for its config — `bi
 This split is the point of the file, and dropping it silently breaks `require_cwd`.
 
 - **Web filetypes override the global default with `lsp_format = "never"`.** Otherwise, in a project with no prettier and no biome config, the global `"fallback"` hands the buffer to `vtsls`/`jsonls`, which reformats it with tsserver defaults — defeating `require_cwd` and reformatting exactly the repositories that opted out. Verified: `const   x:number=1` became `const x: number = 1`.
-- **Native toolchains keep `"fallback"`**, because there the fallback is what you want: if the dedicated binary is missing, sourcekit / roslyn / dartls / gopls produce essentially the same output. `gopls` is configured with `gofumpt = true` precisely so its fallback matches `gofumpt`.
+- **Native toolchains keep `"fallback"`**, because there the fallback is what you want: if the dedicated binary is missing, sourcekit / roslyn / dartls produce essentially the same output. **Go is the exception.** `gopls` carries `gofumpt = true`, which is the right fallback only in a repository that actually wants gofumpt — so the Go entry keeps `"fallback"` when the repository declares no formatter and switches to `"never"` when it does. Without that switch gopls would undo the resolution. See [go.md](../languages/go.md#formatting).
 
 ## Format on save: eslint first, then the formatter
 
@@ -82,6 +84,7 @@ The old `<leader>f` → `vim.lsp.buf.format` mapping was removed from `lua/defau
 |---|---|---|
 | `prettier` | `./node_modules/.bin/prettier` | `npm i -D prettier` — per project |
 | `biome` | `./node_modules/.bin/biome` | `npm i -D @biomejs/biome` — per project |
+| `gofmt` | `gofmt` | Ships with the Go SDK — nothing to install |
 | `goimports` | `goimports` | `:MasonInstall goimports` |
 | `gofumpt` | `gofumpt` | `:MasonInstall gofumpt` |
 | `stylua` | `stylua` | `:MasonInstall stylua` |
@@ -114,4 +117,4 @@ Mason prepends its `bin` directory to `PATH`, so anything installed with `:Mason
 | `:ConformInfo` | Which formatters are available for this buffer, and why one is not |
 | `:checkhealth conform` | Global sanity check |
 
-A formatter reported as unavailable is normal — for `prettier`/`biome` it usually means the project has no config (`require_cwd`), and for the rest it means the binary is not installed, in which case the language server formats instead.
+A formatter reported as unavailable is normal — for `prettier`/`biome` it usually means the project has no config (`require_cwd`), and for the rest it means the binary is not installed, in which case the language server formats instead. The exception is a Go buffer in a repository that declared a formatter: there `lsp_format` is `"never"`, so an uninstalled formatter means nothing runs at all.

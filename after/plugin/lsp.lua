@@ -328,6 +328,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			-- Simétrico ao bloco de inlay hints acima.
 			vim.lsp.codelens.enable(true, { bufnr = bufnr })
 		end
+
+		if client and client:supports_method("textDocument/codeAction") then
+			vim.keymap.set("n", "<leader>lo", function()
+				vim.lsp.buf.code_action({
+					context = { only = { "source.organizeImports" }, diagnostics = {} },
+					apply = true,
+				})
+			end, { buffer = bufnr, desc = "Organize imports" })
+		end
 	end,
 })
 
