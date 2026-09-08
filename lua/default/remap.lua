@@ -53,4 +53,6 @@ vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
 end, { desc = "Source current file" })
 
-vim.keymap.set("n", "<leader>sp", "<cmd>echo expand('%')<CR>", { desc = "Show current file path" })
+vim.keymap.set("n", "<leader>sp", function()
+	vim.notify(vim.fn.expand("%"), vim.log.levels.INFO, { title = "File path" })
+end, { desc = "Show current file path" })
