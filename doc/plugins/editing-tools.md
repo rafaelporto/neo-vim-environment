@@ -2,15 +2,24 @@
 
 Small utility plugins configured across several `after/plugin/` files.
 
-## Comment.nvim
+## Commenting (native)
 
-Configuration in `after/plugin/comment.lua`. Bare `setup()` call — uses default keymaps.
+No plugin and no configuration. Provided by nvim 0.12 itself (`vim/_comment.lua`).
 
 | Key | Mode | Action |
 |---|---|---|
 | `gcc` | n | Toggle line comment |
 | `gc` + motion | n | Comment motion (e.g. `gcap` = comment paragraph) |
 | `gc` | v | Toggle comment on selection |
+| `gc` | o | Comment textobject |
+
+Two things worth knowing:
+
+- **No leader.** `<Space>gc` is not a mapping. It appears to work because nvim gives up on the
+  `<leader>g*` prefix after `timeoutlen` and replays the keys unmapped, so you pay a 1 s wait
+  and the cursor moves one column right.
+- **`gcgc` selects the whole contiguous comment block**, not just the lines you commented, so
+  next to existing comments it strips a marker from those too. `u` to undo.
 
 ## vim-surround
 

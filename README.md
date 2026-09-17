@@ -107,7 +107,6 @@ See [doc/plugins/neotest.md](doc/plugins/neotest.md).
 
 | Plugin | Purpose |
 |---|---|
-| [numToStr/Comment.nvim](https://github.com/numToStr/Comment.nvim) | Toggle comments (`gcc`, `gc`) |
 | [tpope/vim-surround](https://github.com/tpope/vim-surround) | Surround motions (`ys`, `cs`, `ds`) |
 | [folke/todo-comments.nvim](https://github.com/folke/todo-comments.nvim) | Highlight and navigate TODO/FIXME/etc |
 | [RRethy/vim-illuminate](https://github.com/RRethy/vim-illuminate) | Highlight all occurrences of word under cursor |

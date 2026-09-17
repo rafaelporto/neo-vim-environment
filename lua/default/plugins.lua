@@ -227,7 +227,6 @@ return {
 	},
 	{ "saadparwaiz1/cmp_luasnip", lazy = false },
 	{ "rafamadriz/friendly-snippets", lazy = false },
-	{ "numToStr/Comment.nvim", lazy = false },
 	{
 		"folke/todo-comments.nvim",
 		dependencies = { "nvim-lua/plenary.nvim" },

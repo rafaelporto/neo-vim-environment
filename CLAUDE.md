@@ -158,6 +158,8 @@ Before adding a keymap, grep for the key. `<leader>d` and `<leader>x` each had t
 
 **Still a rough edge:** a key that is both a complete mapping *and* a prefix pays `timeoutlen` before firing. The frequent offenders were fixed (Harpoon add → `<leader>A`, DAP UI → `<leader>D*`), but these remain, all pre-existing: `n` (vs `ntd`), `p` (vs `ptd`), `<leader>s` (vs 21 telescope maps), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`. Listed so a future keymap is not added to an already-crowded prefix without noticing.
 
+A related but distinct trap: a sequence that is **not** a mapping at all, but whose prefix is, also pays `timeoutlen` and then replays the keys unmapped. `<Space>gc` is the live example — see the Commenting section.
+
 ### Tests (`<leader>t`, all languages via neotest)
 
 | Key | Action |
@@ -288,6 +290,26 @@ the plugin at startup again.
 
 `after/plugin/none-ls.lua` survives for **one** source, `editorconfig_checker`, behind an `executable()` guard. Everything else moved to conform or nvim-lint. Do not add formatters back to none-ls; with only a diagnostics source it no longer claims formatting capability, which is what keeps it from competing with conform.
 
+## Commenting
+
+**Commenting is native: no plugin, no configuration.** nvim 0.12 provides `gc` (operator), `gcc` (line, takes a count), `gc` in visual, and `gc` as an operator-pending textobject.
+
+Two usage traps, both found while testing the migration:
+
+- **The key is `gcc`, with no leader.** `<Space>gc` looks like it works and doesn't: `<Space>g`
+  is a live prefix (seven `<leader>g*` maps), so nvim waits `timeoutlen`, finds no
+  `<leader>gc`, aborts, and replays the keys unmapped — `<Space>` becomes `l` and `gc` becomes
+  the operator. The comment lands correctly; the cost is a 1000 ms wait plus a cursor one
+  column right, which shifts the range of a charwise `gc`.
+- **`gcgc` takes the whole contiguous comment block**, not only what you just commented. Next
+  to pre-existing comments it strips one marker from those too: in a `Makefile` whose lines 2-5
+  were already `#` comments, commenting 1-3 and then `gcgc` broke lines 4 and 5. `u` is the
+  safe undo. This is native textobject behaviour and predates the migration.
+
+`Comment.nvim` was removed and must not come back. Its `ft.calculate` guards a `pcall(vim.treesitter.get_parser, buf)` with `if not ok`, but nvim 0.12 **removed** the erroring behaviour — `get_parser()` now returns `nil` instead of throwing (`:h news`, *REMOVED FEATURES*). So `ok` is always `true`, `parser` is `nil`, and `ft.contains(nil, …)` dies on `nil:children()`. The plugin swallows the error and prints `[Comment.nvim] nil`, so the symptom is "commenting silently does nothing" in **every filetype with no treesitter parser installed**: tmux, kitty, `Makefile`, `.ini`, `conf`, `crontab`, `fstab`, `.editorconfig`, `sshconfig`, `gitconfig`. The fix upstream is one word and has been an open PR since April 2026; the plugin has had no commit since June 2024.
+
+There is deliberately no `gb`/`gbc` (block comment), no `gco`/`gcO`/`gcA`, and no JSX-aware `{/* */}`. nvim has no block-comment operator and the alternatives were evaluated and declined — a choice, not an omission. Block delimiters *are* reachable from the native `'comments'` option (`s1:/*` + `ex:*/`) if that decision is ever revisited.
+
 ## Adding a New Plugin
 
 1. Add spec to `lua/default/plugins.lua`
@@ -297,7 +319,31 @@ the plugin at startup again.
 
 ## Filetype Associations
 
-Custom filetype assignments live in `after/plugin/filetypes.lua` via autocmds: JSON files (`.json`, `.jsonc`, `.json.base`) and shell files (`.sh`, `.zsh`, `.tmux`, zprofile). Treesitter language aliases (`jsonc`/`json5` → `json`, `zsh` → `bash`) are registered separately in `after/plugin/treesitter.lua`.
+Custom filetype assignments live in `after/plugin/filetypes.lua` via one autocmd, for shell files (`.sh`, `.zsh`, `.tmux`, zprofile). Treesitter language aliases (`jsonc`/`json5` → `json`, `zsh` → `bash`) are registered separately in `after/plugin/treesitter.lua`.
+
+That autocmd is load-bearing and forces `sh` on purpose: `.tmux` and `zprofile` (no dot) have **no** native filetype at all, and `.zsh` natively resolves to `zsh`, not `sh`.
+
+> **There used to be a second autocmd forcing `filetype=json` on `.json`, `.jsonc` and
+> `.json.base`, and it should not come back.** It was removed for filetype correctness, not to
+> fix commenting: nvim gives `.jsonc` *and* `tsconfig.json` the `jsonc` filetype, which carries
+> `commentstring=// %s` directly, and the override replaced that with the empty
+> `commentstring` that `$VIMRUNTIME/ftplugin/json.vim` sets deliberately (*"JSON has no
+> comments"*). It was also redundant for `.json` (nvim already detects it) and dead for
+> `.json.base` (no such file exists here). Nothing depended on it: `jsonls` already declares
+> `filetypes = { "json", "jsonc" }`, conform has entries for both, and the treesitter alias
+> above covers highlighting.
+>
+> Measured, so the reasoning is not overstated: forcing `json` back would **not** break
+> commenting today — native `gc` still resolves `// %s` through the fallback below. It did
+> break it under `Comment.nvim`, which consulted only its own filetype table and the buffer
+> `commentstring`.
+>
+> Plain `.json` comments too, and the reason is worth knowing: its own `commentstring` is
+> empty, so nvim falls back to the tree-sitter language and asks
+> `vim.filetype.get_option(ft, 'commentstring')` for each filetype that language claims.
+> Because `treesitter.lua` registers `json` against `{ json, jsonc, json5 }`, that lookup finds
+> `jsonc`'s `// %s`. So the alias is load-bearing for commenting, not only for highlighting —
+> drop it and `.json` goes back to `Option 'commentstring' is empty.`
 
 Before adding an autocmd here, check `$VIMRUNTIME/lua/vim/filetype.lua` — nvim 0.12 already
 maps far more than it looks. `.csproj`/`.slnx`/`.csproj.user` → `xml`, `.sln` → `solution`,

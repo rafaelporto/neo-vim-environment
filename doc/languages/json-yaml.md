@@ -1,6 +1,6 @@
 # JSON / YAML
 
-Configuration in `after/plugin/lsp.lua` (jsonls + yamlls blocks), `after/plugin/filetypes.lua` and `after/plugin/formatting.lua`.
+Configuration in `after/plugin/lsp.lua` (jsonls + yamlls blocks) and `after/plugin/formatting.lua`.
 
 ## JSON
 
@@ -8,7 +8,7 @@ Configuration in `after/plugin/lsp.lua` (jsonls + yamlls blocks), `after/plugin/
 
 ### Filetypes
 
-`json` and `jsonc`. An autocmd in `filetypes.lua` also sets `.json.base` files to `filetype=json`.
+`json` and `jsonc`, both detected natively by nvim: `.json` → `json`; `.jsonc` and `tsconfig.json` → `jsonc`.
 
 ### Schema validation
 
