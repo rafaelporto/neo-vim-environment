@@ -7,6 +7,90 @@ return {
 	{ "dracula/vim", name = "dracula-theme", priority = 1000 },
 	"mbbill/undotree",
 	{
+		-- Reimplementa em Lua o protocolo de IDE do Claude Code (WebSocket +
+		-- lockfile em ~/.claude/ide/<porta>.lock). Ganho: as edições do Claude
+		-- abrem como diff no nvim, revisáveis e editáveis antes de ir a disco.
+		-- provider = "none": o CLI continua no painel tmux e conecta com /ide —
+		-- nada de terminal aninhado dentro do nvim, e nenhuma dependência nova
+		-- (snacks.nvim só é exigido pelo provider "snacks").
+		-- Carrega por cmd e keys, sem event: o servidor nasce no primeiro
+		-- <leader>C* ou :ClaudeCode*, que é o fluxo de qualquer forma — sobe o
+		-- servidor aqui e conecta com /ide no painel ao lado. Era VeryLazy só
+		-- enquanto durou o experimento, para o teste não morrer pelo lazy-load em
+		-- vez de pelo plugin. Só as keys não bastam: sem cmd, os :ClaudeCode* não
+		-- existem até a primeira tecla. Os 4 comandos de terminal do plugin
+		-- (ClaudeCode, Open, Focus, Close) ficam fora porque provider = "none".
+		"coder/claudecode.nvim",
+		opts = { terminal = { provider = "none" } },
+		cmd = {
+			"ClaudeCodeStart",
+			"ClaudeCodeStop",
+			"ClaudeCodeStatus",
+			"ClaudeCodeSend",
+			"ClaudeCodeSendText",
+			"ClaudeCodeAdd",
+			"ClaudeCodeTreeAdd",
+			"ClaudeCodeDiffAccept",
+			"ClaudeCodeDiffDeny",
+			"ClaudeCodeCloseAllDiffs",
+			"ClaudeCodeSelectModel",
+		},
+		keys = {
+			{ "<leader>Cc", "<cmd>ClaudeCodeStart<cr>", desc = "Claude: sobe o servidor" },
+			{ "<leader>Cx", "<cmd>ClaudeCodeStop<cr>", desc = "Claude: para o servidor" },
+			{ "<leader>Ci", "<cmd>ClaudeCodeStatus<cr>", desc = "Claude: status da conexão" },
+			{ "<leader>Cs", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Claude: envia a seleção" },
+			{ "<leader>Ca", "<cmd>ClaudeCodeAdd %<cr>", desc = "Claude: adiciona o arquivo atual" },
+			{ "<leader>Cy", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Claude: aceita o diff" },
+			{ "<leader>Cn", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Claude: rejeita o diff" },
+		},
+		config = function(_, opts)
+			require("claudecode").setup(opts)
+
+			-- <C-s> é ":w" em remap.lua, e dentro do diff do Claude ":w" significa
+			-- ACEITAR. Sem isto o reflexo de salvar aprova a sugestão sem leitura.
+			local disarmed = {}
+
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "ClaudeCodeDiffOpened",
+				callback = function()
+					vim.schedule(function()
+						for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+							if vim.wo[win].diff then
+								local buf = vim.api.nvim_win_get_buf(win)
+								vim.keymap.set({ "n", "i" }, "<C-s>", function()
+									vim.notify(
+										"diff do Claude: <leader>Cy aceita, <leader>Cn rejeita",
+										vim.log.levels.WARN
+									)
+								end, {
+									buffer = buf,
+									desc = "Claude diff: <C-s> desarmado",
+								})
+								disarmed[buf] = true
+							end
+						end
+					end)
+				end,
+			})
+
+			-- Uma das janelas do diff é o buffer do arquivo REAL, e o mapa
+			-- buffer-local não morre com o diff. Sem esta limpeza o <C-s> fica
+			-- desarmado naquele arquivo pelo resto da sessão. Testado: acontece.
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "ClaudeCodeDiffClosed",
+				callback = function()
+					for buf in pairs(disarmed) do
+						if vim.api.nvim_buf_is_valid(buf) then
+							pcall(vim.keymap.del, { "n", "i" }, "<C-s>", { buffer = buf })
+						end
+					end
+					disarmed = {}
+				end,
+			})
+		end,
+	},
+	{
 		"williamboman/mason.nvim",
 		build = function()
 			pcall(vim.cmd, "MasonUpdate")
@@ -183,6 +267,7 @@ return {
 				-- <leader>A, que é mapa único e por isso não vira grupo.
 				{ "<leader>a", group = "diagnostics" },
 				{ "<leader>c", group = "code" },
+				{ "<leader>C", group = "claude" },
 				{ "<leader>D", group = "debug UI" },
 				{ "<leader>F", group = "flutter" },
 				{ "<leader>g", group = "git / goto" },
