@@ -114,6 +114,12 @@ See [doc/plugins/neotest.md](doc/plugins/neotest.md).
 | [nvim-treesitter/nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) | Parser installer + queries (branch `main`); highlighting is done by nvim itself |
 | [windwp/nvim-ts-autotag](https://github.com/windwp/nvim-ts-autotag) | Auto-close and rename JSX/TSX/HTML tag pairs |
 
+### AI
+
+| Plugin | Purpose |
+|---|---|
+| [coder/claudecode.nvim](https://github.com/coder/claudecode.nvim) | Claude Code IDE protocol — edits arrive as reviewable diffs (`<leader>C*`), see [doc/plugins/claude.md](doc/plugins/claude.md) |
+
 ### Language-specific
 
 | Plugin | Purpose |
@@ -133,4 +139,4 @@ Full list in [doc/plugins/keymaps.md](doc/plugins/keymaps.md).
 See [doc/](doc/) for per-plugin configuration guides and per-language setup + debug workflows.
 
 - Languages: [go](doc/languages/go.md) · [typescript](doc/languages/typescript.md) · [dart-flutter](doc/languages/dart-flutter.md) · [swift](doc/languages/swift.md) · [csharp](doc/languages/csharp.md) · [lua](doc/languages/lua.md) · [json-yaml](doc/languages/json-yaml.md)
-- Cross-cutting: [lsp-core](doc/plugins/lsp-core.md) · [formatting](doc/plugins/formatting.md) · [neotest](doc/plugins/neotest.md) · [dap-core](doc/plugins/dap-core.md) · [editing-tools](doc/plugins/editing-tools.md)
+- Cross-cutting: [lsp-core](doc/plugins/lsp-core.md) · [formatting](doc/plugins/formatting.md) · [neotest](doc/plugins/neotest.md) · [dap-core](doc/plugins/dap-core.md) · [editing-tools](doc/plugins/editing-tools.md) · [claude](doc/plugins/claude.md)

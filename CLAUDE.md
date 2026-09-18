@@ -150,7 +150,7 @@ A missing formatter is not an error: conform marks it unavailable and either fal
 
 ### Namespaces
 
-`<leader>a` diagnostics (`aa`/`ad`/`ae`/`aq`/`aw`) · `<leader>A` Harpoon add · `<leader>c` code actions + chmod · `<leader>d` delete-without-yank · `<leader>D` DAP UI · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles and actions · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (buffer-local to Swift)
+`<leader>a` diagnostics (`aa`/`ad`/`ae`/`aq`/`aw`) · `<leader>A` Harpoon add · `<leader>c` code actions + chmod · `<leader>C` Claude Code · `<leader>d` delete-without-yank · `<leader>D` DAP UI · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles and actions · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (buffer-local to Swift)
 
 Before adding a keymap, grep for the key. `<leader>d` and `<leader>x` each had two owners at once, and in both cases the collision silently broke the older binding — `<leader>dd` was dead in every LSP buffer, and `<leader>xq` resolved to a command that does not exist.
 
@@ -215,6 +215,7 @@ The rule: a language's tooling loads only for files that use it. Verified by
 | xcodebuild.nvim | `ft = { "swift", "objc", "objcpp" }` on the spec; `dap-swift.lua` defers its setup into a `once` FileType autocmd |
 | neotest and its five adapters | memoised helper in `after/plugin/neotest.lua`, triggered by the `<leader>t` maps |
 | flutter-tools.nvim | `ft = { "dart" }`, config inline in the spec |
+| claudecode.nvim | `cmd` + `keys` on the spec and **no** `event` — see below |
 | which-key.nvim | `event = "VeryLazy"` |
 | github-theme, catppuccin | `setup()` runs from a table keyed by colorscheme, only when selected |
 
@@ -226,6 +227,13 @@ must **not** `load_extension("dap")` (it pulls telescope-dap and with it nvim-da
 into every startup — the extension loads inside `ensure()` instead), and
 neotest's debug map has to call `ensure()` itself, or the session runs with no UI
 because the dapui listeners were never registered.
+
+**claudecode.nvim is the newest member, and it earned the rule twice over.** The plugin
+defaults to `auto_start`, so `setup()` opens a WebSocket server and writes a lockfile under
+`~/.claude/ide/`. Loaded eagerly, that meant one listening server per Neovim session, whether
+or not Claude Code was ever used. It now loads on the first `<leader>C*` or `:ClaudeCode*`.
+Both handlers are needed: `keys` alone leaves the `:ClaudeCode*` commands undefined until a
+key is pressed, and `cmd` alone would not cover the visual-mode `<leader>Cs`.
 
 **Never spawn a subprocess at startup.** `swift-config.lua` used to resolve
 sourcekit with `vim.fn.system("xcrun -f sourcekit-lsp")`, costing 16.97 ms of its

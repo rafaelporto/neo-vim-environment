@@ -12,6 +12,7 @@ Defined in `lua/default/remap.lua`. Active in all buffers regardless of filetype
 | `<leader>a` | Diagnostics lists (`lsp.lua`, `trouble.lua`) |
 | `<leader>A` | Harpoon add file — a complete mapping, not a prefix |
 | `<leader>c` | Code actions and `chmod +x` |
+| `<leader>C` | Claude Code (`Cc`, `Cx`, `Ci`, `Cs`, `Ca`, `Cy`, `Cn`) |
 | `<leader>d` | Delete without yank (`remap.lua`) — an **operator**, nothing else may live under it |
 | `<leader>D` | DAP UI (`Du`, `Dc`) |
 | `<leader>e` | File tree (neo-tree) |
