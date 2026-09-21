@@ -33,6 +33,10 @@ Same schemastore.nvim integration:
 schemas = require("schemastore").yaml.schemas()
 ```
 
+Helm charts get their own treatment — templates and `values.yaml` have a
+dedicated filetype and LSP, so yamlls doesn't try to parse Go-template syntax
+as plain YAML. See [helm.md](helm.md).
+
 ## Formatting
 
 Owned by conform.nvim (`after/plugin/formatting.lua`), on save and with `<leader>f`:

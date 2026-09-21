@@ -193,6 +193,7 @@ return {
 				"gomod",
 				"gosum",
 				"gowork",
+				"helm",
 				"html",
 				"javascript",
 				"jsdoc",

@@ -26,6 +26,7 @@ require("mason-lspconfig").setup({
 		"yamlls",
 		"jsonls",
 		"dockerls",
+		"helm_ls",
 	},
 	-- mason-lspconfig auto-habilita todo servidor instalado. ts_ls nunca deve
 	-- subir junto do vtsls (diagnostics duplicados + memória dobrada), então
@@ -187,6 +188,13 @@ vim.lsp.config["yamlls"] = {
 	},
 }
 
+-- helm_ls (Mason package "helm-ls") has no block here on purpose: its
+-- nvim-lspconfig default already ships filetypes = {"helm", "yaml.helm-values"}
+-- and root_markers = {"Chart.yaml"}, which is exactly what's needed. Templates
+-- get the buffer-local filetype "helm" from after/plugin/filetypes.lua, which
+-- yamlls does NOT listen on — that's what keeps it from trying (and failing)
+-- to parse Go-template syntax as plain YAML. See doc/languages/helm.md.
+
 -- lua_ls — replaces lsp.nvim_lua_ls() + neodev.nvim
 -- on_init injects neovim runtime paths only when editing nvim config/data dirs
 vim.lsp.config["lua_ls"] = {
@@ -229,6 +237,7 @@ vim.lsp.enable({
 	"jsonls",
 	"yamlls",
 	"lua_ls",
+	"helm_ls",
 })
 
 -- ─── Keymaps (LspAttach) ──────────────────────────────────────────────────────

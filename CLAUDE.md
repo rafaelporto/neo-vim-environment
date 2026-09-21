@@ -66,7 +66,7 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
 
 **`after/plugin/treesitter.lua` owns highlighting.** It guards on `vim.treesitter.highlighter.active[buf]` because `vim.treesitter.start()` builds a highlighter unconditionally and native ftplugins already start `lua`/`markdown`/`help`/`query`. It also sets treesitter folds, which is why `foldlevel`/`foldlevelstart` are 99 in `set.lua`.
 
-- 34 distinct languages resolve after install, against the 7 nvim ships. That is 33 entries in the `install({...})` list plus `dtd`, which `xml` pulls in as a dependency and which therefore never appears in the list. (`nvim_get_runtime_file("parser/*.so")` reports more, because the 7 bundled ones are also in the install list and so appear twice.) Removing a language from the list does **not** uninstall its parser — `scala` kept resolving until `:TSUninstall scala`.
+- 35 distinct languages resolve after install, against the 7 nvim ships. That is 34 entries in the `install({...})` list plus `dtd`, which `xml` pulls in as a dependency and which therefore never appears in the list. (`nvim_get_runtime_file("parser/*.so")` reports more, because the 7 bundled ones are also in the install list and so appear twice.) Removing a language from the list does **not** uninstall its parser — `scala` kept resolving until `:TSUninstall scala`.
 - Host prerequisite: `brew install tree-sitter-cli` (≥ 0.26.1). The `swift` parser needs it to generate.
 - Commands: `:TSInstall`, `:TSUpdate`, `:TSUninstall`, `:TSLog`, and `:checkhealth nvim-treesitter`.
 - To add a language, add it to the `install({...})` list and run `:TSUpdate`.
@@ -81,6 +81,12 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
   declares `cwd = root_file({ "buf.yaml" })` and marks itself unavailable without it — and
   `buf_ls` would start via its `.git` fallback but resolve no imports, filling the buffer
   with "file not found" for code that builds fine. Revisit only if a project adopts buf.
+- `helm` (tier 2, `ngalaiko/tree-sitter-go-template`, `dialects/helm`) is the only parser
+  installed for Helm charts. `gotmpl` is **not** in the list even though
+  `queries/helm/injections.scm` declares `; inherits: gotmpl` — that inheritance is
+  query-*text* resolution (`nvim_get_runtime_file`), not a parser dependency, and
+  nvim-treesitter ships `runtime/queries/gotmpl/*.scm` inside the plugin itself regardless of
+  what's in `install({...})`. See `doc/languages/helm.md`.
 - `razor` is available upstream but not installed: nothing here uses `.razor`/`.cshtml`. The
   Roslyn server does support Razor via co-hosting if that changes — add the parser and
   `razor` to the plugin's `ft`.
@@ -96,6 +102,7 @@ Parsers therefore come from `nvim-treesitter` on **`branch = "main"`**, where af
 | C# | roslyn (seblyng/roslyn.nvim) — **requires manual server install, from a second Mason registry** | Roslyn is the sole formatter (csharpier deliberately not installed), netcoredbg via `netcoredbg-macOS-arm64.nvim` (DAP), neotest-dotnet |
 | Lua | lua_ls | workspace configured for nvim API, conform (stylua) |
 | JSON/YAML | jsonls + yamlls | schemastore.nvim for schema validation |
+| Helm | helm_ls (templates get filetype `helm`; `values.yaml` gets `yaml.helm-values` and keeps yamlls too) | `vim.filetype.add` with a Chart.yaml check in `after/plugin/filetypes.lua`, dedicated treesitter parser — see `doc/languages/helm.md` |
 
 ### External tools
 
@@ -327,7 +334,7 @@ There is deliberately no `gb`/`gbc` (block comment), no `gco`/`gcO`/`gcA`, and n
 
 ## Filetype Associations
 
-Custom filetype assignments live in `after/plugin/filetypes.lua` via one autocmd, for shell files (`.sh`, `.zsh`, `.tmux`, zprofile). Treesitter language aliases (`jsonc`/`json5` → `json`, `zsh` → `bash`) are registered separately in `after/plugin/treesitter.lua`.
+Custom filetype assignments live in `after/plugin/filetypes.lua`, via two different mechanisms: an autocmd for shell files (`.sh`, `.zsh`, `.tmux`, zprofile), and `vim.filetype.add({ pattern = {...} })` for Helm templates and `values.yaml` (each pattern gated on a nearby `Chart.yaml`, so it only fires inside a real chart — see `doc/languages/helm.md`). Treesitter language aliases (`jsonc`/`json5` → `json`, `zsh` → `bash`) are registered separately in `after/plugin/treesitter.lua`.
 
 That autocmd is load-bearing and forces `sh` on purpose: `.tmux` and `zprofile` (no dot) have **no** native filetype at all, and `.zsh` natively resolves to `zsh`, not `sh`.
 
