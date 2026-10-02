@@ -163,7 +163,7 @@ Before adding a keymap, grep for the key. `<leader>d` and `<leader>x` each had t
 
 **which-key.nvim shows the continuations** after a prefix, which is why `timeoutlen` is deliberately left at its default of 1000 — the problem was never the wait, it was not remembering the key. Do not lower it as an "optimization": a short window makes deliberately-typed sequences fail, and this config has 79 `<leader>` mappings in normal mode alone (100 counting every mode and buffer-local ones).
 
-**Still a rough edge:** a key that is both a complete mapping *and* a prefix pays `timeoutlen` before firing. The frequent offenders were fixed (Harpoon add → `<leader>A`, DAP UI → `<leader>D*`), but these remain, all pre-existing: `n` (vs `ntd`), `p` (vs `ptd`), `<leader>s` (vs 21 telescope maps), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`. Listed so a future keymap is not added to an already-crowded prefix without noticing.
+**Still a rough edge:** a key that is both a complete mapping *and* a prefix pays `timeoutlen` before firing. The frequent offenders were fixed (Harpoon add → `<leader>A`, DAP UI → `<leader>D*`), but these remain, all pre-existing: `n` (vs `ntd`), `p` (vs `ptd`), `<leader>s` (vs 20 maps under it), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`. Listed so a future keymap is not added to an already-crowded prefix without noticing.
 
 A related but distinct trap: a sequence that is **not** a mapping at all, but whose prefix is, also pays `timeoutlen` and then replays the keys unmapped. `<Space>gc` is the live example — see the Commenting section.
 
