@@ -101,18 +101,9 @@ The adapter is registered as **`go`**, not `delve`: that is the name `neotest-go
 
 Debugging a *single* test comes from neotest (`<leader>tD`), so there is no per-test configuration here.
 
-### DAP keymaps (global)
-
-| Key | Action |
-|---|---|
-| `F9` | Toggle breakpoint |
-| `F5` | Continue / start |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift+F11` | Step out |
-| `Shift+F5` | Stop session |
-| `<leader>Du` | Toggle DAP UI |
-| `<leader>Dc` | Close DAP UI |
+The DAP keymaps are global and identical for every language — `F9`, `F5`, `F10`, `F11`,
+step out, stop, `<leader>Du` / `<leader>Dc`. Single source:
+[dap-core.md](../plugins/dap-core.md#global-keymaps).
 
 ## Testing
 
@@ -130,21 +121,9 @@ Debugging a *single* test comes from neotest (`<leader>tD`), so there is no per-
 
 > **Known false alarm:** `:checkhealth neotest-golang` reports two errors for `testify/namespace` and `testify/test_method` when `testify_enabled` is on. Its `health.lua` looks for `namespace.scm` and `test_method.scm`, files the plugin does not ship; the runtime actually loads `features/testify/queries/go/{testify_method,suite,package}.scm`, all present. Test discovery works with `testify_enabled` both true and false.
 
-### Test keymaps
-
-| Key | Action |
-|---|---|
-| `<leader>tt` | Run nearest test |
-| `<leader>tf` | Run current file |
-| `<leader>ta` | Run whole suite |
-| `<leader>tD` | Debug nearest test (via DAP) |
-| `<leader>tl` | Re-run last |
-| `<leader>tS` | Stop run |
-| `<leader>ts` | Toggle summary panel |
-| `<leader>to` | Open output for the nearest test |
-| `<leader>tp` | Toggle output panel |
-| `<leader>tw` | Toggle watch mode for the file |
-| `]n` / `[n` | Jump to next / previous failed test |
+The `<leader>t` keymaps are the same for every language — nearest, file, suite, debug,
+re-run, stop, summary, output, watch, and `]n` / `[n` between failures. Single source:
+[neotest.md](../plugins/neotest.md#keymaps).
 
 ## Treesitter
 

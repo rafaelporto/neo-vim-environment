@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Neovim configuration targeting **nvim 0.12+**. It uses `lazy.nvim` for plugin management and the native LSP client API (`vim.lsp.config`). The primary language is **Go**; Swift/iOS, Flutter/Dart and JS/TS are also in active use.
 
+> Every claim in this file about Neovim itself was last verified against **nvim 0.12.5** (`news.txt`, `deprecated.txt`, `:h lsp-defaults`, `:h treesitter-defaults`, `:h default-mappings`). When upgrading, those are the pages to re-read — the defaults are what move.
+
 ## Load Order
 
 ```
@@ -157,17 +159,30 @@ A missing formatter is not an error: conform marks it unavailable and either fal
 
 ### Namespaces
 
-`<leader>a` diagnostics (`aa`/`ad`/`ae`/`aq`/`aw`) · `<leader>A` Harpoon add · `<leader>c` code actions + chmod · `<leader>C` Claude Code · `<leader>d` delete-without-yank · `<leader>D` DAP UI · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles and actions · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (buffer-local to Swift)
+`<leader>a` diagnostics (`aa`/`ad`/`ae`/`aq`/`aw`) · `<leader>A` Harpoon add · `<leader>c` code actions + chmod · `<leader>C` Claude Code · `<leader>d` delete-without-yank · `<leader>D` DAP UI · `<leader>e` neo-tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git and LSP goto · `<leader>l` LSP toggles and actions · `<leader>m` lint · `<leader>n` noice · `<leader>p` find files, previews, paste · `<leader>s` Telescope search · `<leader>t` tests · `<leader>v` LSP symbols and config quick-open · `<leader>x` xcodebuild (buffer-local to Swift)
+
+> `doc/plugins/keymaps.md` is the single source for this list and holds every individual key; the copy here is deliberate, because an agent reading this file does not follow links and the next rule is only actionable with the list in front of it. Keep the two in step.
 
 Before adding a keymap, grep for the key. `<leader>d` and `<leader>x` each had two owners at once, and in both cases the collision silently broke the older binding — `<leader>dd` was dead in every LSP buffer, and `<leader>xq` resolved to a command that does not exist.
 
-**which-key.nvim shows the continuations** after a prefix, which is why `timeoutlen` is deliberately left at its default of 1000 — the problem was never the wait, it was not remembering the key. Do not lower it as an "optimization": a short window makes deliberately-typed sequences fail, and this config has 79 `<leader>` mappings in normal mode alone (100 counting every mode and buffer-local ones).
+**which-key.nvim shows the continuations** after a prefix, which is why `timeoutlen` is deliberately left at its default of 1000 — the problem was never the wait, it was not remembering the key. Do not lower it as an "optimization": a short window makes deliberately-typed sequences fail, and this config has 85 `<leader>` mappings in normal mode globally, and 115 in a Swift buffer once the LSP and xcodebuild maps attach.
 
-**Still a rough edge:** a key that is both a complete mapping *and* a prefix pays `timeoutlen` before firing. The frequent offenders were fixed (Harpoon add → `<leader>A`, DAP UI → `<leader>D*`), but these remain, all pre-existing: `n` (vs `ntd`), `p` (vs `ptd`), `<leader>s` (vs 20 maps under it), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`. Listed so a future keymap is not added to an already-crowded prefix without noticing.
+**Still a rough edge:** a key that is both a complete mapping *and* a prefix pays `timeoutlen` before firing. The frequent offenders were fixed (Harpoon add → `<leader>A`, DAP UI → `<leader>D*`), but these remain, all pre-existing: `n` (vs `ntd`), `p` (vs `ptd`), `<leader>s` (vs 20 maps under it), `<leader>vd` (vs `<leader>vds`), `<leader>ne`, `<leader>st`.
+
+Two more only become visible against the nvim 0.12 defaults, and both are buffer-local to LSP buffers:
+
+- **`gr`** (references) is a complete mapping sitting on the prefix of nvim's own `gra`/`gri`/`grn`/`grr`/`grt`/`grx` — so all six defaults wait out `timeoutlen`. `grt` and `grx` are new in 0.12, so this got worse without the config changing.
+- **`>d` / `<d`** (next/previous diagnostic) sit on the `>` and `<` **operators**, so `>>`, `<<` and `>ap` wait too. nvim already ships `]d` / `[d` for the same navigation.
+
+Listed so a future keymap is not added to an already-crowded prefix without noticing. Full table in `doc/plugins/keymaps.md`.
+
+> **Not a collision, do not "fix" it:** neotest's `]n` / `[n` (next/previous failure) are normal-mode; nvim 0.12's `]n` / `[n` are visual-mode treesitter node selection. Different modes.
 
 A related but distinct trap: a sequence that is **not** a mapping at all, but whose prefix is, also pays `timeoutlen` and then replays the keys unmapped. `<Space>gc` is the live example — see the Commenting section.
 
 ### Tests (`<leader>t`, all languages via neotest)
+
+Owned by `doc/plugins/neotest.md`; repeated here for the same reason as the namespaces above.
 
 | Key | Action |
 |---|---|
@@ -207,7 +222,7 @@ The Flutter config is **inline in the lazy spec** in `lua/default/plugins.lua`, 
 
 If no SDK is found, `setup()` is skipped and the plugin's own "Flutter executable could not be found…" message is the single notification.
 
-**Debugging Flutter:** standard DAP keymaps — `F5` (continue/start), `F9` (toggle breakpoint), `F10` (step over), `F11` (step into), `<S-F11>` (step out), `<S-F5>` (stop). The debug adapter is bundled with the Flutter SDK. `debugger.enabled = true` alone routes `FlutterRun` through DAP; **`run_via_dap` no longer exists in flutter-tools** — do not add it back.
+**Debugging Flutter:** the standard DAP keymaps, owned by `doc/plugins/dap-core.md` — `F5`, `F9`, `F10`, `F11`, `<S-F11>` / `<F23>` (step out), `<S-F5>` / `<F17>` (stop, via `dap.terminate()`). The debug adapter is bundled with the Flutter SDK. `debugger.enabled = true` alone routes `FlutterRun` through DAP; **`run_via_dap` no longer exists in flutter-tools** — do not add it back.
 
 Two settings are deliberately absent from the Dart LSP config: `analysisExcludedFolders` (the plugin default already excludes `<sdk>/packages` and `<sdk>/.pub-cache`, and settings merge with `tbl_deep_extend("force")`, so declaring the key would delete both — use `analysis_options.yaml` instead), and `completeFunctionCalls`/`showTodos`/`updateImportsOnRename` (already plugin defaults).
 

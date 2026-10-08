@@ -113,18 +113,9 @@ Prompts are wrapped in functions, so they fire on `F5` rather than at startup.
 
 > **No ts-node / tsx configuration**, on purpose: Node 26 strips types natively, so `.ts` files run directly. Debugging a *test* comes from neotest (`<leader>tD`), so there is no jest/vitest configuration here either.
 
-### DAP keymaps (global)
-
-| Key | Action |
-|---|---|
-| `F9` | Toggle breakpoint |
-| `F5` | Continue / start |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift+F11` | Step out |
-| `Shift+F5` | Stop session |
-| `<leader>Du` | Toggle DAP UI |
-| `<leader>Dc` | Close DAP UI |
+The DAP keymaps are global and identical for every language — `F9`, `F5`, `F10`, `F11`,
+step out, stop, `<leader>Du` / `<leader>Dc`. Single source:
+[dap-core.md](../plugins/dap-core.md#global-keymaps).
 
 ## Testing
 
@@ -136,19 +127,9 @@ Prompts are wrapped in functions, so they fire on `F5` rather than at startup.
 
 > **Do not override `jestArguments`:** without `--forceExit`, `--testLocationInResults`, `--json` and `--outputFile` the adapter hangs. And do not enable `jest_test_discovery` — it requires the global `discovery.enabled = false`, which would degrade Go, Dart and .NET discovery.
 
-| Key | Action |
-|---|---|
-| `<leader>tt` | Run nearest test |
-| `<leader>tf` | Run current file |
-| `<leader>ta` | Run whole suite |
-| `<leader>tD` | Debug nearest test (via DAP) |
-| `<leader>tl` | Re-run last |
-| `<leader>tS` | Stop run |
-| `<leader>ts` | Toggle summary panel |
-| `<leader>to` | Open output for the nearest test |
-| `<leader>tp` | Toggle output panel |
-| `<leader>tw` | Toggle watch mode for the file |
-| `]n` / `[n` | Jump to next / previous failed test |
+The `<leader>t` keymaps are the same for every language — nearest, file, suite, debug,
+re-run, stop, summary, output, watch, and `]n` / `[n` between failures. Single source:
+[neotest.md](../plugins/neotest.md#keymaps).
 
 ## Editing
 

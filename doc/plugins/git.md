@@ -20,3 +20,12 @@ Configuration in `after/plugin/fugitive.lua`.
 | `:Git diff` | View diff |
 | `:GBrowse` | Open file on GitHub |
 | `:GBlame` | Toggle git blame |
+
+## `:DiffTool` — built into nvim 0.12
+
+nvim 0.12 ships a `difftool` plugin: `:DiffTool {left} {right}` opens a diff of two files **or two
+directories** (`:h difftool`). No `:packadd` needed.
+
+It does not overlap with fugitive — it knows nothing about git, revisions or the index. It is useful
+next to it: comparing a worktree against an export, or two checkouts of the same tree. `:Git diff`
+stays the tool for anything revision-aware.

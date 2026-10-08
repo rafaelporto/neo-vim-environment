@@ -41,6 +41,11 @@ Configuration in `after/plugin/undotree.lua`. Persistent undo stored in `~/.vim/
 |---|---|
 | `<leader>u` | Toggle undotree panel |
 
+> **nvim 0.12 ships its own undo-tree viewer**, as an opt-in builtin plugin: `:packadd nvim.undotree`
+> then `:Undotree` (`:h package-undotree`). It draws a textual tree into a split and moves through
+> the undo states as the cursor moves. `mbbill/undotree` stays anyway — it has the diff panel and the
+> timestamps the builtin does not. Noted so the builtin is a known option, not a rediscovery.
+
 ## Todo Comments
 
 Configuration in `after/plugin/todo-comment.lua`. Highlights `TODO`, `FIXME`, `HACK`, `NOTE`, `BUG`, `PERF`, `WARN` in comments.
@@ -59,7 +64,23 @@ Two files own this: parser installation lives in the `nvim-treesitter` spec in `
 
 ### What nvim ships — and what it does not
 
-nvim 0.12 ships the treesitter **API** (`vim.treesitter.start()`, `vim.treesitter.foldexpr()`, incremental selection) but only **7 parsers**: `c`, `lua`, `markdown`, `markdown_inline`, `query`, `vim`, `vimdoc`. There is no `vim.treesitter.install` (the field is `nil`), no `:Treesitter` command, and none is planned for 0.13.
+nvim 0.12 ships the treesitter **API** (`vim.treesitter.start()`, `vim.treesitter.foldexpr()`, `vim.treesitter.select()`) but only **7 parsers**: `c`, `lua`, `markdown`, `markdown_inline`, `query`, `vim`, `vimdoc`. There is no `vim.treesitter.install` (the field is `nil`), no `:Treesitter` command, and none is planned for 0.13. Re-verified against **nvim 0.12.5**.
+
+**Incremental selection is native and needs no plugin** (`:h treesitter-defaults`). These are default mappings, created by nvim itself:
+
+| Key | Mode | Action |
+|---|---|---|
+| `an` | v | Select the [count]th parent node |
+| `in` | v | Select the [count]th child node |
+| `]n` / `[n` | v | Select the next / previous node |
+| `]N` / `[N` | v | Expand the selection to the next / previous sibling |
+
+> `an` and `in` fall back to `vim.lsp.buf.selection_range()` in a buffer with **no** parser, so they
+> work in the filetypes treesitter does not cover.
+>
+> **These do not collide with neotest's `]n` / `[n`** (next / previous failed test), which are
+> normal-mode and set in `after/plugin/neotest.lua`. Different modes, no shadowing in either
+> direction — written down here so it is not "fixed" later as if it were a conflict.
 
 > Previous versions of this document claimed nvim 0.12+ ships parsers bundled and that `nvim-treesitter` was not needed. That was false — outside those 7 filetypes there was no parser, so no treesitter highlighting, no treesitter folds and no rainbow delimiters.
 
@@ -90,11 +111,17 @@ nvim 0.12 ships the treesitter **API** (`vim.treesitter.start()`, `vim.treesitte
 
 ### Installed parsers
 
-31 parsers are installed into `stdpath("data")/site/parser` (the 7 nvim ships are in the list as well, so the site copy wins):
+35 parsers are installed into `stdpath("data")/site/parser` (the 7 nvim ships are in the list as well, so the site copy wins):
 
-`bash`, `c`, `c_sharp`, `css`, `dart`, `diff`, `dockerfile`, `gitcommit`, `gitignore`, `go`, `gomod`, `gosum`, `gowork`, `html`, `javascript`, `jsdoc`, `json`, `lua`, `luadoc`, `markdown`, `markdown_inline`, `query`, `regex`, `sql`, `swift`, `toml`, `tsx`, `typescript`, `vim`, `vimdoc`, `yaml`.
+`bash`, `c`, `c_sharp`, `css`, `dart`, `diff`, `dockerfile`, `dtd`, `gitcommit`, `gitignore`, `go`, `gomod`, `gosum`, `gowork`, `helm`, `html`, `javascript`, `jsdoc`, `json`, `lua`, `luadoc`, `markdown`, `markdown_inline`, `proto`, `query`, `regex`, `sql`, `swift`, `toml`, `tsx`, `typescript`, `vim`, `vimdoc`, `xml`, `yaml`.
 
-> `scala` was dropped with Scala support — a parser compiled on every fresh install for a language nothing else in this config targeted.
+> **35 on disk, 34 in the list.** `dtd` never appears in `install({ ... })` — `xml` pulls it in as
+> a dependency. So the count here and the length of the call in `lua/default/plugins.lua` differ
+> by one on purpose.
+
+> `scala` was dropped with Scala support — a parser compiled on every fresh install for a language
+> nothing else in this config targeted. Removing a language from the list does **not** uninstall
+> its parser: `scala` kept resolving until `:TSUninstall scala`.
 
 ### Host prerequisites
 
@@ -145,6 +172,22 @@ Auto-closes and auto-renames tag pairs (`<div>` → `</div>`) in JSX/TSX, HTML a
 | `opts` | `{}` |
 
 > **`opts = {}` is mandatory, not decoration.** It is what makes lazy.nvim call `setup({})`. Without an explicit setup the plugin takes its zero-config path, which does `require("nvim-treesitter.configs")` (`internal.lua:460`) to read a legacy `autotag` module — a module that does not exist on branch `main`.
+
+## Auto-reload of files changed outside nvim
+
+Configuration in `after/plugin/autoread.lua`. No plugin — two autocmds around nvim's own
+`'autoread'`.
+
+`'autoread'` is already on by default, but it only acts when something triggers `checktime`, and
+nothing did. The first autocmd supplies the trigger on `FocusGained`, `BufEnter`, `CursorHold`,
+`CursorHoldI` and `TermLeave`.
+
+> `FocusGained` is the trigger that matters in a tmux layout (switching back to the nvim pane), and
+> it only arrives with `focus-events on` set in tmux. Without that, the other four still fire.
+
+The second autocmd is on `FileChangedShellPost` and notifies on every reload. Reloading silently is
+worse than not reloading: the text changes under the cursor with no explanation. A buffer with
+unsaved changes is never overwritten — nvim prompts instead.
 
 ## vim-illuminate
 

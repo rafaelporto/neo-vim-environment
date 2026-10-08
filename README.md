@@ -23,17 +23,17 @@ LSP servers install themselves via Mason. The remaining tools are manual:
 
 ```vim
 :MasonInstall gopls delve golangci-lint gofumpt goimports vtsls js-debug-adapter stylua
-:MasonInstall roslyn
+:MasonInstall roslyn                          " C#, needs the Crashdummyy registry
 ```
 
 ```sh
 brew install tree-sitter-cli editorconfig-checker
 brew install swiftformat swiftlint            # Swift, optional
-go install gotest.tools/gotestsum@latest      # test runner for Go
+go install gotest.tools/gotestsum@latest      # neotest-golang runner
 npm i -D prettier                             # per project, never global
 ```
 
-> **Roslyn (C#):** must be installed manually — `seblj/roslyn.nvim` manages the LSP lifecycle but expects the binary to already exist.
+> **Roslyn (C#):** must be installed manually — `seblyng/roslyn.nvim` manages the LSP lifecycle but expects the binary to already exist.
 > **Flutter/Dart:** `dartls` ships with the Flutter SDK. The SDK is discovered automatically (PATH → project `.fvm` → common paths), so no path needs editing.
 > A missing formatter is never an error: conform marks it unavailable and either falls back to the language server or leaves the buffer alone.
 
@@ -124,19 +124,19 @@ See [doc/plugins/neotest.md](doc/plugins/neotest.md).
 
 | Plugin | Purpose |
 |---|---|
-| [seblj/roslyn.nvim](https://github.com/seblj/roslyn.nvim) | C# LSP via Roslyn |
+| [seblyng/roslyn.nvim](https://github.com/seblyng/roslyn.nvim) | C# LSP via Roslyn |
 | [wojciech-kulik/xcodebuild.nvim](https://github.com/wojciech-kulik/xcodebuild.nvim) | Xcode build/test/run/coverage integration |
 | [akinsho/flutter-tools.nvim](https://github.com/akinsho/flutter-tools.nvim) | Dart/Flutter LSP, hot reload, DAP |
 
 ## Keymaps
 
-Leader is `<space>`, and [which-key](https://github.com/folke/which-key.nvim) shows the available continuations after any prefix. Namespaces: `<leader>a` diagnostics · `<leader>A` Harpoon add · `<leader>c` code actions · `<leader>d` delete without yank · `<leader>D` DAP UI · `<leader>e` file tree · `<leader>f` format · `<leader>F` Flutter · `<leader>g` git · `<leader>l` LSP toggles · `<leader>m` lint · `<leader>t` tests · `<leader>v` LSP symbols · `<leader>x` xcodebuild (Swift buffers only).
+Leader is `<space>`, and [which-key](https://github.com/folke/which-key.nvim) shows the available continuations after any prefix — which matters, because there are 85 `<leader>` mappings in normal mode before a language server attaches.
 
-Full list in [doc/plugins/keymaps.md](doc/plugins/keymaps.md).
+The namespaces (`<leader>a` diagnostics, `<leader>t` tests, `<leader>x` xcodebuild, and a dozen more) and every individual key are listed in **[doc/plugins/keymaps.md](doc/plugins/keymaps.md)**, which is the single source for them.
 
 ## Docs
 
 See [doc/](doc/) for per-plugin configuration guides and per-language setup + debug workflows.
 
-- Languages: [go](doc/languages/go.md) · [typescript](doc/languages/typescript.md) · [dart-flutter](doc/languages/dart-flutter.md) · [swift](doc/languages/swift.md) · [csharp](doc/languages/csharp.md) · [lua](doc/languages/lua.md) · [json-yaml](doc/languages/json-yaml.md)
+- Languages: [go](doc/languages/go.md) · [typescript](doc/languages/typescript.md) · [dart-flutter](doc/languages/dart-flutter.md) · [swift](doc/languages/swift.md) · [csharp](doc/languages/csharp.md) · [lua](doc/languages/lua.md) · [json-yaml](doc/languages/json-yaml.md) · [helm](doc/languages/helm.md)
 - Cross-cutting: [lsp-core](doc/plugins/lsp-core.md) · [formatting](doc/plugins/formatting.md) · [neotest](doc/plugins/neotest.md) · [dap-core](doc/plugins/dap-core.md) · [editing-tools](doc/plugins/editing-tools.md) · [claude](doc/plugins/claude.md)

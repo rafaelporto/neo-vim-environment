@@ -73,6 +73,11 @@ Both are registered so a monorepo with different runners per package works witho
 
 ## Keymaps
 
+**This table is the single source for the test keymaps.** The language docs link here instead of
+repeating it; they carry only what is specific to their adapter. The one deliberate copy is
+[keymaps.md](keymaps.md), the global key index, whose job is to answer "what does `<leader>t` do"
+without a jump.
+
 The `<leader>t` namespace, all in normal mode:
 
 | Key | Action |
@@ -89,6 +94,10 @@ The `<leader>t` namespace, all in normal mode:
 | `<leader>tw` | Toggle watch mode for the current file |
 | `]n` | Jump to next failed test |
 | `[n` | Jump to previous failed test |
+
+> **`]n` / `[n` do not collide with nvim's own.** nvim 0.12 maps `]n` / `[n` in **visual** mode, for
+> treesitter node selection (`:h v_]n`). These are normal-mode. Different modes, so neither shadows
+> the other.
 
 > **`<leader>tD` calls `require("default.dap").ensure()` first.** neotest brings up nvim-dap on its own for `strategy = "dap"`, but the listeners that open and close the dapui live in `lua/default/dap.lua` — without that call the test would be debugged with no UI at all. See [dap-core.md](dap-core.md).
 

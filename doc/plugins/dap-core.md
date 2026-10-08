@@ -54,18 +54,30 @@ The UI opens automatically when a session starts (`attach` or `launch`) and clos
 
 ## Global Keymaps
 
-| Key | Action |
-|---|---|
-| `F9` | Toggle breakpoint |
-| `F5` | Continue / start session |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift+F11` | Step out |
-| `Shift+F5` | Stop session |
-| `<leader>Du` | Toggle DAP UI |
-| `<leader>Dc` | Close DAP UI |
+**This table is the single source for the DAP keymaps.** The language docs link here instead of
+repeating it; they carry only what is specific to their adapter.
+
+| Key | Also bound as | Action |
+|---|---|---|
+| `F9` | — | Toggle breakpoint |
+| `F5` | — | Continue / start session |
+| `F10` | — | Step over |
+| `F11` | — | Step into |
+| `Shift+F11` | `<F23>` | Step out |
+| `Shift+F5` | `<F17>` | Stop session (`dap.terminate()`) |
+| `<leader>Du` | — | Toggle DAP UI |
+| `<leader>Dc` | — | Close DAP UI |
 
 All of them route through a helper that calls `ensure()` before touching `dap`, so any one of them is a valid entry point into the stack.
+
+> **Why the `<F17>` / `<F23>` aliases.** Under `TERM=xterm-256color` — which is what tmux reports —
+> the terminal sends shifted function keys as the *higher* F-key codes, so `<S-F5>` arrives as `<F17>`
+> and `<S-F11>` as `<F23>`. nvim never sees the shifted form, and stop and step-out silently did
+> nothing. Both spellings are mapped to the same handler, so it works with and without tmux.
+
+> **Stop calls `dap.terminate()`, not `dap.close()`.** `close()` detaches the client and leaves the
+> debuggee running — the next session then fails to bind the port, which reads as "the debugger
+> broke" long after the real cause.
 
 > **`<leader>Du` / `<leader>Dc`, not `<leader>du` / `<leader>duc`.** `<leader>d` is the delete-without-yank **operator** (`remap.lua`). While a `<leader>du` existed, every `<leader>dw` / `<leader>dip` / `<leader>d}` paid `timeoutlen` waiting to see whether a `u` followed. The capital matches the `<leader>F` (Flutter) and `<leader>X` (xcodebuild) convention. See [keymaps.md](keymaps.md).
 

@@ -177,18 +177,9 @@ correct the pre-filled dll path.
 
 **Attach workflow:** `dotnet run` → `F5` → "Attach a processo" → pick the process.
 
-### DAP keymaps (global)
-
-| Key | Action |
-|---|---|
-| `F9` | Toggle breakpoint |
-| `F5` | Continue / start |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift+F11` | Step out |
-| `Shift+F5` | Stop |
-| `<leader>Du` | Toggle DAP UI |
-| `<leader>Dc` | Close DAP UI |
+The DAP keymaps are global and identical for every language — `F9`, `F5`, `F10`, `F11`,
+step out, stop, `<leader>Du` / `<leader>Dc`. Single source:
+[dap-core.md](../plugins/dap-core.md#global-keymaps).
 
 ## Testing
 
@@ -214,19 +205,9 @@ piece of this setup. `easy-dotnet.nvim` is the modern alternative (solution expl
 commands, its own neotest adapter) and was considered; it was left out to avoid a new global
 tool dependency and churn in the `<leader>t` maps that already work for Go, Dart and JS.
 
-| Key | Action |
-|---|---|
-| `<leader>tt` | Run nearest test |
-| `<leader>tf` | Run current file |
-| `<leader>ta` | Run whole suite |
-| `<leader>tD` | Debug nearest test (via `netcoredbg`) |
-| `<leader>tl` | Re-run last |
-| `<leader>tS` | Stop run |
-| `<leader>ts` | Toggle summary panel |
-| `<leader>to` | Open output for the nearest test |
-| `<leader>tp` | Toggle output panel |
-| `<leader>tw` | Toggle watch mode for the file |
-| `]n` / `[n` | Jump to next / previous failed test |
+The `<leader>t` keymaps are the same for every language — nearest, file, suite, debug,
+re-run, stop, summary, output, watch, and `]n` / `[n` between failures. Single source:
+[neotest.md](../plugins/neotest.md#keymaps). Here `<leader>tD` debugs through `netcoredbg`.
 
 ## Project files and protobuf
 

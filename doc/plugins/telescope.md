@@ -26,7 +26,7 @@ Loaded on demand:
 | Key | Action |
 |---|---|
 | `<leader>pf` | Find files |
-| `<leader>sF` | Find all files (hidden + no-ignore) |
+| `<leader>pF` | Find all files (hidden + no-ignore) |
 | `<C-p>` | Git files |
 | `<leader>sB` | File browser |
 | `<leader>so` | Recent files |
@@ -62,7 +62,7 @@ Loaded on demand:
 | `<leader>sd` | Diagnostics |
 | `<leader>stl` | Treesitter symbols |
 
-> `<leader>stl` needs a treesitter parser for the buffer's language. With only the 7 parsers nvim ships it worked almost nowhere; the parsers installed by `nvim-treesitter` (see [editing-tools.md](editing-tools.md)) cover 31 languages now.
+> `<leader>stl` needs a treesitter parser for the buffer's language. With only the 7 parsers nvim ships it worked almost nowhere; the parsers installed by `nvim-treesitter` (see [editing-tools.md](editing-tools.md)) cover 35 languages now.
 
 ### Git
 

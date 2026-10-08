@@ -7,6 +7,11 @@ Defined in `lua/default/remap.lua`. Active in all buffers regardless of filetype
 
 ## Namespaces
 
+**This table is the single source for the leader namespaces.** `README.md` links here; `CLAUDE.md`
+keeps its own copy on purpose — it is read by agents that do not follow links, and the rule it
+states there ("grep for the key before adding a keymap") is only actionable with the list in front
+of it.
+
 | Prefix | Owner |
 |---|---|
 | `<leader>a` | Diagnostics lists (`lsp.lua`, `trouble.lua`) |
@@ -82,7 +87,7 @@ Defined in `lua/default/remap.lua`. Active in all buffers regardless of filetype
 
 ## Testing — `<leader>t` (neotest)
 
-Set in `after/plugin/neotest.lua`. Full detail in [neotest.md](neotest.md).
+Set in `after/plugin/neotest.lua`. [neotest.md](neotest.md) owns this table — the copy here is deliberate, so the global key index answers `<leader>t` without a jump.
 
 | Key | Action |
 |---|---|
@@ -136,3 +141,28 @@ Set in `after/plugin/lsp.lua` on `LspAttach`, most gated on client capability. F
 | `<leader>a` (harpoon add file) | `<leader>A` | `<leader>a` is the diagnostics namespace (`aa` / `ad` / `ae` / `aq` / `aw`), so a complete `<leader>a` paid `timeoutlen` on every add — on one of the most frequent actions there is. `<C-e>` and `<leader>1`–`<leader>4` are unchanged. See [harpoon.md](harpoon.md) |
 
 > The pattern in the last two rows is the same one: a **complete** mapping that is also the **prefix** of others costs `timeoutlen` every single time. Moving it to a capital is cheaper than lowering `timeoutlen` globally, and which-key removes the reason people lower it in the first place.
+
+## Mappings that are also prefixes
+
+The rows above are the ones that were *fixed*. These are the ones still live — a **complete**
+mapping sitting on a **prefix**, so the complete one waits out `timeoutlen` (1000 ms) on every use.
+Listed so a new keymap is not added to an already-crowded prefix by accident. Checked against
+**nvim 0.12.5**, which is where the first two come from.
+
+| Complete mapping | Is also the prefix of | Cost |
+|---|---|---|
+| `gr` — references (`lsp.lua`, buffer-local) | nvim's own `gra`, `gri`, `grn`, `grr`, `grt`, `grx` | All six defaults wait in any LSP buffer. `grt` and `grx` are new in 0.12, so this got worse without the config changing |
+| `>d` / `<d` — next / previous diagnostic (`lsp.lua`, buffer-local) | the `>` and `<` **operators** | `>>`, `<<`, `>ap`, `<j` all wait, in any LSP buffer. nvim already ships `]d` / `[d` for the same navigation |
+| `n` — next search result, centered (`remap.lua`) | `ntd` (todo-comments) | Every repeat-search waits |
+| `p` — builtin paste, not remapped | `ptd` (todo-comments) | Every paste waits |
+| `<leader>s` — substitute word under cursor (`remap.lua`) | 20 maps under `<leader>s` | The most expensive one in the config |
+| `<leader>st` — telescope pickers | `<leader>stl` | — |
+| `<leader>ne` — Noice enable | `<leader>ner` | — |
+| `<leader>vd` — diagnostic float | `<leader>vds` | Buffer-local |
+
+> **`]n` / `[n` are not on this list.** neotest's next/previous-failure are normal-mode; nvim 0.12's
+> `]n` / `[n` are visual-mode treesitter node selection (`:h v_]n`). Different modes — no shadowing,
+> nothing to fix. Written down so it is not "found" again as a collision.
+
+> **`<leader>p` is not on this list either.** `remap.lua` maps it in visual mode only, and the nine
+> maps under `<leader>p*` are all normal-mode. Disjoint, so no wait.

@@ -16,6 +16,12 @@ Configuration in `after/plugin/noice.lua`. Noice replaces the cmdline UI and rou
 - Save ("written") messages are **silently suppressed** — no notification on `:w`.
 - LSP markdown rendering is overridden to use Treesitter.
 
+> The override key for that last one is `["vim.lsp.util.stylize_markdown"] = true`, and
+> `vim.lsp.util.stylize_markdown()` was **deprecated in nvim 0.12** (replacement:
+> `vim.treesitter.start()` with `conceallevel = 2`, which is what noice does anyway). This is a noice
+> route name, not a call into the deprecated function, so nothing breaks today — but it is the key to
+> revisit if noice ever stops rendering hover docs after an nvim upgrade.
+
 ## nvim-notify config
 
 | Option | Value |

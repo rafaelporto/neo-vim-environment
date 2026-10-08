@@ -4,9 +4,13 @@ Plugin spec in `lua/default/plugins.lua`. There is deliberately **no** `after/pl
 
 ## Purpose
 
-After a prefix, which-key pops up the possible continuations with the `desc` of each mapping. This config declares **79 `<leader>` mappings in normal mode alone**, or 100 counting every mode plus the buffer-local ones present in a given buffer — so it replaces having to remember them.
+After a prefix, which-key pops up the possible continuations with the `desc` of each mapping. This config declares **85 `<leader>` mappings in normal mode** globally — 87 distinct `<leader>` sequences once the two visual-only ones (`<leader>p` paste-over, `<leader>Cs` send-selection) are counted — so it replaces having to remember them.
 
-The tree is lopsided, which is exactly why a popup helps. Counting normal-mode globals per prefix: `<leader>s` 22 (20 telescope pickers, plus `<leader>sp` show-file-path and the substitute-word map, both from `remap.lua`), `<leader>t` 11 (neotest), `<leader>p` 8 (split between telescope, goto-preview and netrw), `<leader>g` 7, `<leader>n` 7 (noice), `<leader>v` 3, and the rest one or two each. On top of that, xcodebuild contributes 19 (18 normal + 1 visual) that are buffer-local to Swift/ObjC — they show up in the 100, never in the 79.
+Buffer-local maps stack on top of that, and which ones depends on the buffer: 12 from the LSP attach (`after/plugin/lsp.lua`), 19 from xcodebuild in Swift/ObjC (18 normal + 1 visual), 11 from flutter-tools in Dart. A Swift buffer with `sourcekit` attached therefore has **115** `<leader>` maps in normal mode.
+
+The tree is lopsided, which is exactly why a popup helps. Counting normal-mode globals per prefix: `<leader>s` 21 (19 telescope pickers, plus `<leader>sp` show-file-path and the substitute-word map, both from `remap.lua`), `<leader>t` 11 (10 neotest + `<leader>td` from todo-comments), `<leader>p` 9 (split between telescope, goto-preview and netrw), `<leader>g` 7, `<leader>n` 7 (noice), `<leader>C` 7 (6 normal + 1 visual), `<leader>v` 3, and the rest one or two each.
+
+> The counts above are the global ones, measured with `nvim_get_keymap` on a real session rather than by counting `vim.keymap.set` calls — several are set inside loops and helpers.
 
 > **`timeoutlen` was deliberately not lowered**, and stays at its default of 1000. The temptation with a leader tree this deep is to shorten the wait. But the wait was never the problem: the problem was not knowing which key comes next, and a shorter `timeoutlen` only makes the ambiguity resolve faster — it tells you nothing. Worse, a short window makes deliberately-typed sequences *fail*. which-key answers the actual question instead. The keymap moves that *were* made (see [keymaps.md](keymaps.md#recent-moves-and-why)) are a different fix for a different problem — a complete mapping sitting on a prefix, which costs the timeout on *every* use.
 
@@ -34,6 +38,7 @@ Registered through `opts.spec`. Descriptions of individual keys come from the `d
 |---|---|---|
 | `<leader>a` | diagnostics | n |
 | `<leader>c` | code | n |
+| `<leader>C` | claude | n |
 | `<leader>D` | debug UI | n |
 | `<leader>F` | flutter | n |
 | `<leader>g` | git / goto | n |

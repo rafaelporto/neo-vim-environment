@@ -27,7 +27,7 @@ This is **merge layer 1**, so it applies to every server resolved through `vim.l
 
 `mason-lspconfig` auto-installs and auto-enables servers on startup.
 
-**`ensure_installed`:** `vtsls`, `eslint`, `gopls`, `lua_ls`, `yamlls`, `jsonls`, `dockerls`
+**`ensure_installed`:** `vtsls`, `eslint`, `gopls`, `lua_ls`, `yamlls`, `jsonls`, `dockerls`, `helm_ls`
 
 ```lua
 automatic_enable = { exclude = { "ts_ls", "roslyn_ls" } }
@@ -47,7 +47,7 @@ Servers not managed by Mason are configured the same way but must be reachable o
 
 ## Enabled servers
 
-`vim.lsp.enable({ ... })`: `vtsls`, `eslint`, `gopls`, `cssls`, `marksman`, `dockerls`, `docker_compose_language_service`, `bashls`, `jsonls`, `yamlls`, `lua_ls`
+`vim.lsp.enable({ ... })`: `vtsls`, `eslint`, `gopls`, `cssls`, `marksman`, `dockerls`, `docker_compose_language_service`, `bashls`, `jsonls`, `yamlls`, `lua_ls`, `helm_ls`
 
 > `cssls`, `marksman`, `docker_compose_language_service` and `bashls` are enabled but **not** in `ensure_installed` — enabling a server whose binary is absent is a silent no-op. Install them with `:MasonInstall` if you want them.
 
@@ -55,13 +55,14 @@ Servers not managed by Mason are configured the same way but must be reachable o
 
 | Server | Notable settings |
 |---|---|
-| `gopls` | Full settings block: `gofumpt`, `staticcheck`, `usePlaceholders`, `completeUnimported`, `semanticTokens`, `directoryFilters`, 6 `analyses`, 7 `codelenses`, 7 `hints` — see [go.md](../languages/go.md) |
+| `gopls` | Full settings block: `gofumpt`, `staticcheck`, `usePlaceholders`, `completeUnimported`, `semanticTokens`, `directoryFilters`, 6 `analyses`, 8 `codelenses`, 7 `hints` — see [go.md](../languages/go.md) |
 | `vtsls` | `autoUseWorkspaceTsdk`, `enableMoveToFileCodeAction`, server-side fuzzy match, inlay hints and import preferences for both `typescript` and `javascript` — see [typescript.md](../languages/typescript.md) |
 | `eslint` | `format = false` — lint only |
 | `jsonls` | `filetypes` extended with `jsonc`; schemas from `schemastore.nvim` |
 | `yamlls` | Schemas from `schemastore.nvim` |
 | `bashls` | `filetypes` extended with `zsh` |
 | `lua_ls` | `on_init` injects the nvim runtime library paths only when the workspace is under `stdpath("config")` or `stdpath("data")` — replaces `neodev.nvim` |
+| `helm_ls` | None — enabled with no `vim.lsp.config` block of its own, deliberately. See [helm.md](../languages/helm.md) |
 
 > **Do not add an `on_attach` to `eslint`.** The `lsp/eslint.lua` from `nvim-lspconfig` supplies `workingDirectory = "auto"`, `workspace_required`, a `root_dir` that refuses to attach without an eslint config in the project, and an `on_attach` that creates the `:LspEslintFixAll` command. Overriding it destroys that command, which `after/plugin/formatting.lua` runs on save.
 
@@ -103,6 +104,43 @@ Virtual text is on by default. Toggle between inline virtual text and underline-
 
 > **`<leader>ad`, not `<leader>d`.** This map is buffer-local, so it used to win over the global delete-without-yank from `remap.lua:22` — breaking `<leader>dd` and `<leader>dw` in *every* buffer with an LSP attached (Go, TS, Swift, Dart, Lua). `<leader>a` is already the diagnostics namespace (`aa` / `ae` / `aw` / `aq`).
 
+### What nvim already maps
+
+Checked against **nvim 0.12.5** (`:h lsp-defaults`). These exist with no configuration at all, so
+most of the table above is a *second* binding for something nvim already provides.
+
+Global, created unconditionally at startup:
+
+| Key | Mode | Maps to | Local equivalent here |
+|---|---|---|---|
+| `gra` | n, v | `vim.lsp.buf.code_action()` | `<leader>ca` (actions-preview UI) |
+| `gri` | n | `vim.lsp.buf.implementation()` | `gi` |
+| `grn` | n | `vim.lsp.buf.rename()` | `<leader>rn` |
+| `grr` | n | `vim.lsp.buf.references()` | `gr` |
+| `grt` | n | `vim.lsp.buf.type_definition()` | — (**new in 0.12**) |
+| `grx` | n | `vim.lsp.codelens.run()` | `<leader>lc` (**new in 0.12**) |
+| `gO` | n | `vim.lsp.buf.document_symbol()` | `<leader>vds` |
+| `<C-S>` | i | `vim.lsp.buf.signature_help()` | `<C-h>` |
+| `]d` / `[d` | n | Next / previous diagnostic | `>d` / `<d` |
+
+> `]d` / `[d` are the one row that does not come from `lsp-defaults` — they are plain diagnostic
+> mappings (`:h default-mappings`) and work with any diagnostic source, LSP or not.
+
+Buffer-local, set when a client attaches: `K` → hover (nvim skips it if a custom `K` map already
+exists; either way `K` ends up on `vim.lsp.buf.hover()`, since that is what the local map calls too),
+`'omnifunc'` → `vim.lsp.omnifunc()`, `'tagfunc'` → `vim.lsp.tagfunc()` (this is what makes `<C-]>`
+work), `'formatexpr'` → `vim.lsp.formatexpr()`, and document colors.
+
+> **This is documentation, not a proposal.** The local maps predate the defaults and are the ones in
+> muscle memory. Two consequences worth knowing before touching them:
+>
+> - `gd` has no default at all — go-to-definition is reached through `'tagfunc'` and `<C-]>`, so that
+>   map is the only one in the table carrying its own weight.
+> - `gr` is both a **complete** mapping here and the **prefix** of all six `gr*` defaults, so every
+>   `gra` / `gri` / `grn` / `grr` / `grt` / `grx` waits out `timeoutlen` in an LSP buffer before
+>   falling through. Same shape for `>d` / `<d` over the `>` and `<` operators. See
+>   [keymaps.md](keymaps.md#mappings-that-are-also-prefixes).
+
 ### Capability-gated keymaps
 
 Each is registered inside `LspAttach` only when the attached client advertises the method, so they are absent rather than broken on servers that do not implement it.
@@ -116,3 +154,17 @@ Each is registered inside `LspAttach` only when the attached client advertises t
 - **Inlay hints** are enabled automatically on attach. `dartls` does not implement `textDocument/inlayHint`, so nothing is registered there — its equivalent is flutter-tools' closing labels.
 - **Code lens** is enabled on attach with `vim.lsp.codelens.enable()`, whose provider refreshes itself via `nvim_buf_attach` with a 200 ms debounce — there is no refresh autocmd any more, and `vim.lsp.codelens.refresh()` is deprecated (delegates to `enable`, removed in 0.13). `gopls` exposes `generate`, `tidy`, `test` and `run_govulncheck` here.
 - **Organize imports** is on demand, never on save. In Go the save formatter is resolved from the repository and may be plain `gofmt`, which does not manage imports — see [go.md](../languages/go.md#imports).
+
+## Deprecated APIs still in use
+
+Found while checking this config against the nvim 0.12.5 documentation. All of them still work —
+listed so the next person does not have to rediscover them, and so the migration is a deliberate
+change rather than an emergency.
+
+| Where | API | Deprecated in | Replacement |
+|---|---|---|---|
+| `after/plugin/lsp.lua` (`>d`, `<d`) | `vim.diagnostic.goto_next()` / `goto_prev()` | 0.11 | `vim.diagnostic.jump({ count = 1, float = true })` / `count = -1` |
+| `after/plugin/lsp.lua`, `swift-config.lua`, `plugins.lua` | the `buffer` key in `vim.keymap.set` opts | 0.12 | renamed to `buf`; `buffer` is still accepted |
+
+> `vim.lsp.codelens.refresh()` is in the same bucket but is **not** used here — this config calls
+> `vim.lsp.codelens.enable()`, which is the replacement.

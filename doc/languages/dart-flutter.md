@@ -2,7 +2,7 @@
 
 Configuration lives **inline in the flutter-tools spec** in `lua/default/plugins.lua`. Formatting is in `after/plugin/formatting.lua`, tests in `after/plugin/neotest.lua`.
 
-> There is no `after/plugin/flutter.lua`, on purpose. `ft = { "dart" }` keeps flutter-tools, its ~25 commands and the whole DAP wiring out of every non-Dart session; a file in `after/plugin/` would run at startup and `require()` the plugin unconditionally — the class of problem commit `72413e7` fixed.
+> There is no `after/plugin/flutter.lua`, on purpose. `ft = { "dart" }` keeps flutter-tools, its ~25 commands and the whole DAP wiring out of every non-Dart session; a file in `after/plugin/` would run at startup and `require()` the plugin unconditionally — the same class of problem `after/plugin/roslyn.lua` had, where a file-level `require("roslyn").setup()` defeated the plugin's own `ft = { "cs" }`.
 
 ## Setup
 
@@ -96,18 +96,9 @@ The debug adapter is `flutter debug_adapter`, bundled with the Flutter SDK — n
 2. `F9` — set breakpoints, before or after launch
 3. `F5` — continue if paused
 
-### DAP keymaps (global)
-
-| Key | Action |
-|---|---|
-| `F9` | Toggle breakpoint |
-| `F5` | Continue / start |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift+F11` | Step out |
-| `Shift+F5` | Stop session |
-| `<leader>Du` | Toggle DAP UI |
-| `<leader>Dc` | Close DAP UI |
+The DAP keymaps are global and identical for every language — `F9`, `F5`, `F10`, `F11`,
+step out, stop, `<leader>Du` / `<leader>Dc`. Single source:
+[dap-core.md](../plugins/dap-core.md#global-keymaps).
 
 ## Testing
 
@@ -118,19 +109,9 @@ The debug adapter is `flutter debug_adapter`, bundled with the Flutter SDK — n
 | `command` | `"flutter"` | change to `"fvm flutter"` when using FVM |
 | `use_lsp` | `true` | uses the dartls outline for test names treesitter cannot parse (`testWidgets`, etc.) |
 
-| Key | Action |
-|---|---|
-| `<leader>tt` | Run nearest test |
-| `<leader>tf` | Run current file |
-| `<leader>ta` | Run whole suite |
-| `<leader>tD` | Debug nearest test |
-| `<leader>tl` | Re-run last |
-| `<leader>tS` | Stop run |
-| `<leader>ts` | Toggle summary panel |
-| `<leader>to` | Open output for the nearest test |
-| `<leader>tp` | Toggle output panel |
-| `<leader>tw` | Toggle watch mode for the file |
-| `]n` / `[n` | Jump to next / previous failed test |
+The `<leader>t` keymaps are the same for every language — nearest, file, suite, debug,
+re-run, stop, summary, output, watch, and `]n` / `[n` between failures. Single source:
+[neotest.md](../plugins/neotest.md#keymaps).
 
 ## Dev Log
 

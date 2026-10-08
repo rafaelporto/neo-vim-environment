@@ -81,16 +81,11 @@ That call is made from a `FileType` autocmd with `once = true` on `swift` / `obj
 3. `F5` — attach to the running process
 4. DAP UI opens with scopes, call stack, breakpoints, and console
 
-| Key | Action |
-|---|---|
-| `F9` | Toggle breakpoint |
-| `F5` | Attach / continue |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift+F11` | Step out |
-| `Shift+F5` | Stop session |
-| `<leader>Du` | Toggle DAP UI |
-| `<leader>Dc` | Close DAP UI |
+The DAP keymaps are global and identical for every language — `F9`, `F5`, `F10`, `F11`,
+step out, stop, `<leader>Du` / `<leader>Dc`. Single source:
+[dap-core.md](../plugins/dap-core.md#global-keymaps). The only difference here is what `F5`
+does: with xcodebuild the app is already running on the simulator, so `F5` attaches to it
+rather than launching it.
 
 ## Treesitter
 
